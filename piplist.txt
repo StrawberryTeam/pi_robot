@@ -1,0 +1,43 @@
+﻿sudo apt-get install python3-pip # pip3 install with python3
+
+pip3 install beautifulsoup4 #解html
+pip3 install pymongo #mongodb
+pip3 install requests #get post
+pip3 install lxml #html 解析器 lxml 太大了 内存小的平台装不上 可以考虑 lxml => html5lib
+pip3 install you-get #视频下载
+pip3 install youtube-dl
+pip3 install pypinyin #中文转拼音
+pip3 install jieba #中文分词
+#pip3 install -U requests[socks] #带 socks 
+pip3 install PySocks
+
+#pip3 install ffmpeg-python
+
+# ffmpeg 视频转 mp4 （h.264） 以供web播放
+# ubuntu ffmpeg install
+sudo add-apt-repository ppa:mc3man/trusty-media
+sudo apt-get update
+sudo apt-get install ffmpeg
+
+# debian ffmpeg install
+/etc/apt/sources.list add  >> deb http://ftp.uk.debian.org/debian jessie-backports main
+apt-get update
+apt-get install ffmpeg
+
+# install ffmpeg from source
+http://ffmpeg.org/releases/
+cd /opt/app
+wget http://ffmpeg.org/releases/ffmpeg-3.4.tar.bz2
+tar jxvf ffmpeg-3.4.tar.bz2
+cd ffmpeg
+./configure --prefix=/usr
+time make -j 8
+sudo make install
+
+# 硬盘自动休眠 sdparm
+sudo apt-get install sdparm -y
+hd-idle
+http://www.mkitby.com/2016/05/15/raspberry-pi-nas-manage-hdd-power/
+
+# 查看硬件温度 (python2.7)
+python show_temp.py

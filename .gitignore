@@ -1,0 +1,12 @@
+# Python:
+*.py[cod]
+*.so
+*.egg
+*.egg-info
+dist
+build
+files
+__pycache__
+tasker/__pycache__
+dler/__pycache__
+pi
