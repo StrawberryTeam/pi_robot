@@ -12,6 +12,7 @@ import platform
 import ctypes
 import math
 from common import common, db, config
+import convert
 
 
 class downloader():
@@ -115,6 +116,11 @@ class downloader():
         if not os.path.exists(os.path.join(rdlPath, rfileName)):
             print('确认影片失败，需要重新下载该影片')
             exit()
+
+        # 视频转码 uid = 2 转码 其他暂时不转
+        if '2' == config.uid:
+            convertCls = convert.convert()
+            rfileName = convertCls.toMp4(dlPath, rfileName)
 
         # 下载完成写入新记录
         self._db.newPlay(data['_id'], self._uid, os.path.join(dlPath, rfileName))

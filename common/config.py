@@ -7,7 +7,7 @@
 APP_ENV = "LOCAL" # 开发环境
 
 # 所有环境
-uid = '1'
+uid = '2'
 
 # 可用的分类
 cateIds = [
@@ -28,14 +28,15 @@ proxyIds = [9]
 # 需要下载图片的 ids
 needImgIds = [1, 9]
 
+# 使用 youtube-dl 下载
+youtubeDls = [3]
+
 if "LOCAL" == APP_ENV:
-    mongo_client = 'mongodb://127.0.0.1:27017'
-    db = 'pi_2018'
+    mongo_client = 'mongodb://192.168.56.102:27017'
+    db = 'pi_2017'
     # 图片下载目录
     images_dir = 'files/images'
     # you-get 目录
-    get_dir = '/usr/local/bin/you-get'
+    get_dir = 'you-get'
     # 影片下载目录
     file_dir = 'files'
-    # 临时工作目录
-    temp_dir = 'files/_temp'
