@@ -10,6 +10,8 @@ pip3 install pypinyin #中文转拼音
 pip3 install jieba #中文分词
 #pip3 install -U requests[socks] #带 socks 
 pip3 install PySocks
+pip3 install redis
+pip install supervisor #进程管理 http://supervisord.org/installing.html
 
 #pip3 install ffmpeg-python
 
