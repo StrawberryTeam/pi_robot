@@ -12,3 +12,6 @@ class Iqiyi(TaskProtocol):
 
     def getCategoryList(self):
         print('iqiyi get category list')
+
+    def getVideoList(self, link, startPage = 1, endPage = None):
+        pass
