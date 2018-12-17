@@ -7,6 +7,8 @@ class Run(Straw):
     '''
     执行类
     '''
+    _taskType = None
+    _args = None
 
     def __init__(self):
         super().__init__()
@@ -19,6 +21,7 @@ class Run(Straw):
 
     def parseArgs(self):
         '''
+        使用参数执行
         -d Download
         --download=NAME Download
         --task=TASKNAME Task
