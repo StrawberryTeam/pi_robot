@@ -1,2 +1,1 @@
-# pi_robot
-卡通世界内容抓取自动化机器人
+# pi_robot dev version
