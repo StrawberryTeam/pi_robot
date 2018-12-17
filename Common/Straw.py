@@ -9,8 +9,11 @@ class Straw():
     
     env = 'dev' # 默认生产环境
     def __init__(self):
-        from Config import Config
-        self.env = Config.APP_ENV
+        try:
+            from Config import Config
+            self.env = Config.APP_ENV
+        except ImportError:
+            pass
 
     # 获取配置
     def getConfig(self, node = None):

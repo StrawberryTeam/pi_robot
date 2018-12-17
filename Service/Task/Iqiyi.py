@@ -10,7 +10,8 @@ class Iqiyi(TaskProtocol):
     def __init__(self):
         print('Init task iqiyi')
 
-    def getCategoryList(self):
+    def getCategoryList(self, args):
+        print(args)
         print('iqiyi get category list')
 
     def getVideoList(self, link, startPage = 1, endPage = None):
