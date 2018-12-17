@@ -4,7 +4,7 @@ import importlib
 from Common.Straw import Straw
 from Protocol.TaskProtocol import TaskProtocol
 
-class Task(Straw):
+class Task(TaskProtocol, Straw):
     '''
     执行任务类
     '''
@@ -23,6 +23,7 @@ class Task(Straw):
 
 
     def getCategoryList(self, args):
+        print(self.getConfig('CATE_IDS'))
         '''
         一次性获取所有分类内容
         '''
