@@ -42,6 +42,8 @@ class Task(TaskProtocol, Straw):
                 fLink = link.format(str(page))
                 # 影片集内容
                 setInfo = self._taskObj.getCategoryList(fLink)
+                if None == setInfo:
+                    continue
 
     def getSetContent(self, movieInfo):
         pass

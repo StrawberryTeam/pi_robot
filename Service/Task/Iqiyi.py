@@ -67,7 +67,7 @@ class Iqiyi(TaskProtocol):
         # 第一页数据
         if len(cateData) <= 0:
             print('Category empty')
-            continue
+            return None
 
         # 取第一页数据所有子页
         for movie in cateData:
