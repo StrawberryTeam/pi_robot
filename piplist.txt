@@ -3,7 +3,7 @@
 pip3 install beautifulsoup4 #解html
 pip3 install pymongo #mongodb
 pip3 install requests #get post
-pip3 install lxml #html 解析器 lxml 太大了 内存小的平台装不上 可以考虑 lxml => html5lib
+#pip3 install lxml #html 解析器 lxml 太大了 内存小的平台装不上 可以考虑 lxml => html5lib
 pip3 install you-get #视频下载
 pip3 install youtube-dl
 pip3 install pypinyin #中文转拼音
@@ -11,7 +11,7 @@ pip3 install jieba #中文分词
 #pip3 install -U requests[socks] #带 socks 
 pip3 install PySocks
 pip3 install redis
-pip install supervisor #进程管理 http://supervisord.org/installing.html
+pip3 install supervisor easy_install supervisor #进程管理 http://supervisord.org/installing.html
 
 #pip3 install ffmpeg-python
 

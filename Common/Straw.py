@@ -2,6 +2,7 @@
 #!/usr/bin/python3
 
 import importlib
+
 class Straw():
     '''
     核心类
@@ -55,3 +56,4 @@ class Straw():
         except ImportError:
             print("No factory found {}.".format(factory))
             return
+

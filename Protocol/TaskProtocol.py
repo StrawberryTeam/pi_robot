@@ -8,15 +8,28 @@ class TaskProtocol(metaclass=ABCMeta):
     '''
     
     @abstractmethod
-    def getCategoryList(self):
+    def getCategoryList(self, args):
         '''
         获取所有分类列表
+        (1, 20)
+        startPage 开始页或开始offset
+        endPage 结束页或结束offset
         '''
         pass
 
     @abstractmethod
-    def getVideoList(self, link, startPage = 1, endPage = None):
+    def getSetContent(self, movieInfo):
         '''
-        给定分类获取所有 videos
+        获取影片集内容
+        '''
+        pass
+
+    @abstractmethod
+    def getSetList(self, link, args):
+        '''
+        获取该影片集所有内容 list
+        (1, 20)
+        startPage 开始页或开始offset
+        endPage 结束页或结束offset
         '''
         pass

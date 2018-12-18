@@ -21,7 +21,7 @@ class Run(Straw):
         self._taskType = 'task'
         self._taskName = 'iqiyi'
         self._process = 'getCategoryList'
-        self._args = None
+        self._args = (1,20)
         # 测试用 end
 
         # 根据传入参数拉起一个任务
