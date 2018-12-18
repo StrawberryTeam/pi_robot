@@ -4,7 +4,7 @@ pip3 install beautifulsoup4 #解html
 pip3 install pymongo #mongodb
 pip3 install requests #get post
 #pip3 install lxml #html 解析器 lxml 太大了 内存小的平台装不上 可以考虑 lxml => html5lib
-pip3 install html5lib # 如果都装不上就用默认的 html.parser 3.2 以上内置
+pip3 install html5lib # 如果都装不上就用默认的  html.parser 3.2 以上内置
 pip3 install you-get #视频下载
 pip3 install youtube-dl
 pip3 install pypinyin #中文转拼音
