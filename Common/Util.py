@@ -24,7 +24,7 @@ class Util(Straw):
         '''
         # 要求使用 代理
         if True == proxy:
-            print('Open page with proxy')
+            Util.info('Open page with proxy')
             proxyConfig = Straw.getConfig('PROXY')
             opener = urllib2.build_opener(SocksiPyHandler(socks.SOCKS5, proxyConfig.proxyHost, proxyConfig.proxyPort))
             if True == openOnly:
@@ -32,7 +32,7 @@ class Util(Straw):
             else:
                 res = opener.open(link).read()
         else:
-            print('Open page without proxy')
+            Util.info('Open page without proxy')
             if True == openOnly:
                 res = urllib2.urlopen(link)
             else:
@@ -140,11 +140,11 @@ class Util(Straw):
     @staticmethod
     def canISleep():
         sleepTime = Straw.getConfig('SLEEP')
-        print('任务开始 {}'.format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
+        Util.info('任务开始 {}'.format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
         # 23 - 2点休息
         nhour = int(time.localtime(time.time()).tm_hour)
         if (nhour in sleepTime):
-            print('Sleep time, quit!') 
+            Util.info('Sleep time, quit!') 
             exit()
         return True
 
@@ -160,6 +160,17 @@ class Util(Straw):
     # 错误信息
     @staticmethod
     def error(msg):
+        '''
+        @todo 入 mongodb
+        '''
         print("Error: ---- {}".format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
         print(msg)
         exit()
+
+    # 显示 info 日志
+    @staticmethod
+    def info(*msg):
+        '''
+        @todo 入 mongodb / es 查看
+        '''
+        print(msg)

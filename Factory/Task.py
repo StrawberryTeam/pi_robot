@@ -41,11 +41,33 @@ class Task(TaskProtocol, Straw):
                 # 带 page 的 链接
                 fLink = link.format(str(page))
                 # 影片集内容
-                setInfo = self._taskObj.getCategoryList(fLink)
-                if None == setInfo:
+                setList = self._taskObj.getCategoryList(fLink)
+                # 没有待处理数据
+                if len(setList) <= 0:
+                    Util.info('Category {} with page {} empty'.format(link, page))
                     continue
 
-    def getSetContent(self, movieInfo):
+                # 测试用
+                # print(setList)
+                # exit()
+                # 测试用 end
+
+                # 处理每个影片集
+                for setInfo in setList:
+                    self.getSetContent(setInfo)
+
+    def getSetContent(self, link):
+        '''
+        获取本影片集信息, 保存影片集信息
+        '''
+        setInfo = self._taskObj.getSetContent(link)
+        print(setInfo)
+        pass
+
+    def getSetList(self, setInfo):
+        '''
+        获取影片集影片列表
+        '''
         pass
 
     def getVideoList(self, link, startPage = 1, endPage = None):

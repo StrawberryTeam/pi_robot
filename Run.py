@@ -2,26 +2,28 @@
 #!/usr/bin/python3
 from Common.Straw import Straw
 import getopt, sys
+from Common.Util import Util
 
 class Run(Straw):
     '''
     执行类
     '''
-    _taskType = None
-    _taskName = None
-    _process = None
-    _args = None
+    _taskType = None # 当前待执行的任务类型 task / download / background / front
+    _taskName = None # 当前待执行任务名 iqiyi / youku / download
+    _process = None # 当前待执行的任务 getSetContent 若为空则执行默认方法
+    _args = None # 当前任务的参数 tuple
+    _test = False # True 不执行写入操作，而是立即返回结果
 
     def __init__(self):
         super().__init__()
-        print('Run init')
+        Util.info('Run init')
         self.parseArgs()
 
         # 测试用
         self._taskType = 'task'
         self._taskName = 'iqiyi'
-        self._process = 'getCategoryList'
-        self._args = (1,20)
+        self._process = 'getSetContent'
+        self._args = 'http://www.iqiyi.com/a_19rrhanaux.html#vfrm=2-4-0-1'
         # 测试用 end
 
         # 根据传入参数拉起一个任务
@@ -34,6 +36,7 @@ class Run(Straw):
         '''
         使用参数执行
         -d Download
+        -t Test 不写入信息, 仅测试抓取并立即返回
         --download=NAME Download
         --task=TASKNAME Task
         --background=BGNAME Background
@@ -42,7 +45,8 @@ class Run(Straw):
         --params=PARAMS 指定方法的参数
         '''
         try:
-            opts, args = getopt.getopt(sys.argv[1:],"hdtb:",["download=", 'task=', 'background=', 'process='])
+            opts, args = getopt.getopt(sys.argv[1:],"hdt:",["download=", 'task=', 'background=', 'process='])
+            Util.info((opts, args))
             for opt, arg in opts:
                 if opt == '-h':
                     print('Run.py')
@@ -68,6 +72,9 @@ class Run(Straw):
                     self._process = arg
                 if opt == "--params":
                     self._args = arg
+                # 测试
+                if opt == '-t':
+                    self._test = True
         except getopt.GetoptError:
             print('Key -h see keymap.')
             sys.exit()

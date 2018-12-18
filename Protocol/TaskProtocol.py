@@ -24,12 +24,12 @@ class TaskProtocol(metaclass=ABCMeta):
         '''
         pass
 
-    @abstractmethod
-    def getSetList(self, link, args):
-        '''
-        获取该影片集所有内容 list
-        (1, 20)
-        startPage 开始页或开始offset
-        endPage 结束页或结束offset
-        '''
-        pass
+    # @abstractmethod
+    # def getSetList(self, link, args):
+    #     '''
+    #     获取该影片集所有内容 list
+    #     (1, 20)
+    #     startPage 开始页或开始offset
+    #     endPage 结束页或结束offset
+    #     '''
+    #     pass

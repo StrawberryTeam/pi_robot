@@ -17,101 +17,96 @@ class Iqiyi(TaskProtocol):
     # 总分类链接
     cateLinks = [
         # 儿童
-        # "http://list.iqiyi.com/www/15/-------------11-%s-1-iqiyi--.html"
+        # "http://list.iqiyi.com/www/15/-------------11-{}-1-iqiyi--.html"
         # 动漫
-        "http://list.iqiyi.com/www/4/-------------11-%s-1-iqiyi--.html",
+        "http://list.iqiyi.com/www/4/-------------11-{}-1-iqiyi--.html",
         # # 儿歌
-        # "http://list.iqiyi.com/www/15/---28983----------11-%s-1---.html",
+        # "http://list.iqiyi.com/www/15/---28983----------11-{}-1---.html",
         # # 故事
-        # "http://list.iqiyi.com/www/15/---28984----------11-%s-1---.html",
+        # "http://list.iqiyi.com/www/15/---28984----------11-{}-1---.html",
         # # 英语
-        # "http://list.iqiyi.com/www/15/---28985----------11-%s-1---.html"
+        # "http://list.iqiyi.com/www/15/---28985----------11-{}-1---.html"
     ]
 
     def getCategoryList(self, fLink):
         '''
         获取分类页数据 
         '''
-        print('Task:Iqiyi getCategoryList')
-        print("Do on Cate: {}".format(fLink))
+        Util.info('Task:Iqiyi getCategoryList')
+        Util.info("Do on Cate: {}".format(fLink))
         r = Util.getPage(fLink)
         # 获取分类页内容
-        html = BeautifulSoup(r.text, 'html')
+        html = BeautifulSoup(r.text, 'html5lib')
         # a = html.find('div', {'class': 'mod-page'})
         mainContent = html.find('ul', {'class': 'site-piclist site-piclist-180236 site-piclist-auto'})
         allLi = mainContent.find_all('li')
         cateData = []
         for li in allLi:
             try:
-                imgEle = li.img
-                c_title = imgEle['alt']
-                c_img = imgEle['src']
+                # imgEle = li.img
+                # c_title = imgEle['alt']
+                # c_img = imgEle['src']
                 c_link = li.a['href']
-                if li.find('div', {'class': 'role_info'}):
-                    c_summary = li.find('div', {'class': 'role_info'}).text
-                else:
-                    c_summary = ''
+                # if li.find('div', {'class': 'role_info'}):
+                #     c_summary = li.find('div', {'class': 'role_info'}).text
+                # else:
+                #     c_summary = ''
                 # 所有本分类本页下的内容
-                cateData.append({
-                    'title': c_title.strip(),
-                    'link': c_link.strip(),
-                    'img': c_img.strip(),
-                    'summary': c_summary.strip()
-                })
-                del imgEle, c_title, c_img, c_link, c_summary
+                # cateData.append({
+                #     'title': c_title.strip(),
+                #     'link': c_link.strip(),
+                #     'img': c_img.strip(),
+                #     'summary': c_summary.strip()
+                # })
+                cateData.append(c_link.strip())
+                del c_link
             except KeyError as msg:
-                print("分类缺少必须参数跳过 {}".format(msg))
+                Util.info("分类缺少必须参数跳过 {}".format(msg))
                 continue
 
         del r, html, mainContent, allLi, fLink
-        # 第一页数据
-        if len(cateData) <= 0:
-            print('Category empty')
-            return None
 
-        # 取第一页数据所有子页
-        for movie in cateData:
-            self.getSetContent(movie)
-        del cateData
+        # 每取一页处理一页
+        return cateData
+
 
     _moviceListUrl = 'http://cache.video.iqiyi.com/jp/avlist/%s/%s/50/'
 
-    def getSetContent(self, movie):
+    def getSetContent(self, link):
         '''
-        获取分类页内容
+        获取本影片集信息
         '''
         movieInfo = {}
-        r = Util.getPage(movie['link'])
-        html = BeautifulSoup(r.text, 'html')
+        r = Util.getPage(link)
+        html = BeautifulSoup(r.text, 'html5lib')
         # print(html)
         # 是否是 vip 片
-        movieInfo['is_vip'] = 1 if html.find_all('img', {'src': 'http://pic0.qiyipic.com/common/20171106/ac/1b/vip_100000_v_601_0_20.png'}) else 0 
-        rcontent = html.find_all('div', {'class': 'right_col'})
-        lcontent = html.find_all('div', {'class': 'left_col'})
+        movieInfo['link'] = link # 原始链接
+        movieInfo['is_vip'] = 1 if html.find_all('img', {'class': 'icon-viedo-mr'}) else 0 
+        movieInfo['title'] = html.find('a', {'class': 'info-intro-title'}).text
+        # summary 如果有完整的取完整的
+        summaryList = html.find_all('span', {'class': "briefIntroTxt"})
+        movieInfo['summary'] = summaryList[-1].text
+        movieInfo['img'] = html.find('div', {'class': 'info-img'}).img['src'] # 小图
+        movieInfo['img_large'] = movieInfo['img'].replace('195_260', '480_360') # 大图
+        try:
+            movieInfo['area'] = html.find("p", {'class': "episodeIntro-area"}).a.text
+        except AttributeError:
+            pass
+        try:
+            movieInfo['lang'] = html.find('p', {'class': 'episodeIntro-lang'}).a.text
+        except AttributeError:
+            pass
+        try:
+            movieInfo['category'] = [x.text for x in html.find('p', {'class': "episodeIntro-type"}).find_all('a')]
+        except AttributeError:
+            pass
 
-        # 所有左侧数据
-        for lc in lcontent:
-            lc = lc.get_text()
-            if "地区：" in lc:
-                movieInfo['area'] = lc.replace('地区：', '').strip()
-            if "语言：" in lc:
-                movieInfo['lang'] = lc.replace('语言：', '').strip()
-            if "总播放量：" in lc:
-                movieInfo['allplaynum_txt'] = lc[lc.find('总播放量：') + 5:lc.find('次')].strip()
-                movieInfo['allplaynum'] = Util.getRealPlayNum(movieInfo['allplaynum_txt'])
-        for rc in rcontent:
-            rc = rc.get_text()
-            if '集数：' in rc:
-                # 当前集数
-                movieInfo['now_episode'] = rc.replace('集数：', '').strip()
-                # 是否已完结
-                movieInfo['episode_over'] = 1 if '全' in rc else 0
-                break
-            if '类型：' in rc:
-                movieInfo['category'] = [x.strip() for x in rc.replace('类型：', '').strip().split('/')]
-
+        #     # if "总播放量：" in lc:
+        #     #     movieInfo['allplaynum_txt'] = lc[lc.find('总播放量：') + 5:lc.find('次')].strip()
+        #     #     movieInfo['allplaynum'] = Util.getRealPlayNum(movieInfo['allplaynum_txt'])
         # 本影片内容 set
-        return dict(movieInfo, **movie)
+        return movieInfo
         # 存集合 
         seterId = self._db.saveVideoSet(dict(movieInfo, **movie), self._platform)
         # exit()
