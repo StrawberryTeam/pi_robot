@@ -33,7 +33,7 @@ class Straw():
         try:
             modelObj = importlib.import_module('.{}'.format(model), 'Model')
             modelName = model.split('.')[-1] if model.split('.') else model # get service fun name
-            return getattr(modelObj, modelName)
+            return getattr(modelObj, modelName)()
         except ImportError:
             print("No model found {}.".format(model))
             return
@@ -43,7 +43,7 @@ class Straw():
         try:
             serviceObj = importlib.import_module('.{}'.format(service), 'Service')
             serviceName = service.split('.')[-1] if service.split('.') else service # get service fun name
-            return getattr(serviceObj, serviceName)
+            return getattr(serviceObj, serviceName)()
         except ImportError:
             print("No service found {}.".format(service))
             return

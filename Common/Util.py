@@ -25,23 +25,26 @@ class Util(Straw):
         # 要求使用 代理
         if True == proxy:
             Util.info('Open page with proxy')
-            proxyConfig = Straw.getConfig('PROXY')
-            opener = urllib2.build_opener(SocksiPyHandler(socks.SOCKS5, proxyConfig.proxyHost, proxyConfig.proxyPort))
-            if True == openOnly:
-                res = opener.open(link)
-            else:
-                res = opener.open(link).read()
+            proxyConfig = Straw.getConfig(Straw, 'PROXY')
+            proxies = {'http': "socks5://{}:{}".format(proxyConfig['proxyHost'], proxyConfig['proxyPort'])}
+            # opener = urllib2.build_opener(SocksiPyHandler(socks.SOCKS5, proxyConfig['proxyHost'], proxyConfig['proxyPort']))
+            # if True == openOnly:
+            #     res = opener.open(link)
+            # else:
+            #     res = opener.open(link).read()
         else:
             Util.info('Open page without proxy')
-            if True == openOnly:
-                res = urllib2.urlopen(link)
-            else:
-                res = requests.get(link)
-                try:
-                    res.raise_for_status()
-                except res.exceptions.HTTPError as e:
-                    # Whoops it wasn't a 200
-                    return "Error: " + str(e)
+
+        if True == openOnly:
+            # @todo urlopen 使用 Proxy 的选项
+            res = urllib2.urlopen(link)
+        else:
+            res = requests.get(link, proxies=proxies if True == proxy else False)
+            try:
+                res.raise_for_status()
+            except res.exceptions.HTTPError as e:
+                # Whoops it wasn't a 200
+                return "Error: " + str(e)
         if True == isJson:
             res = res.json()
         return res
@@ -139,7 +142,7 @@ class Util(Straw):
     # 是否该休息了
     @staticmethod
     def canISleep():
-        sleepTime = Straw.getConfig('SLEEP')
+        sleepTime = Straw.getConfig(Straw, 'SLEEP')
         Util.info('任务开始 {}'.format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
         # 23 - 2点休息
         nhour = int(time.localtime(time.time()).tm_hour)

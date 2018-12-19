@@ -1,60 +1,11 @@
 #!/usr/bin/python3
+from Common.Straw import Straw
 import pymongo
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 import os
-try:
-    from common import common,config
-except ImportError as msg:
-    import config as config
-    import common as common
 
-class db():
-
-    # 影片集
-    _videoSetFields = {
-        'title': 'string', #剧集名
-        'summary': 'string', #剧集内容介绍
-        'link': 'string', #内容页地址
-        'img': 'string', #剧集封面图 url
-        'episode_over': 'int', #int 1 已完结 0 未完结 2 单次导入
-        'area': 'string', #影片地区
-        'lang': 'string', #影片语言
-        'is_vip': 'int', # 1 需要 vip 账号才能观看 0 无账号可观看,
-        'allplaynum': 'int', # 总播放量
-        'allplaynum_txt': 'string', # 总播放量文本化
-        'now_episode': 'string', # 当前更新集数文本化 例 138集
-        'episode': 'int', # 'int 已找到的总集数 保存完所有影片分片后，通过 modifyEpisode(data, _id) 方法更新总分片数为总集数'
-        'platform': 'int', # 平台 id
-        'category': 'list', #影片分类
-        'dl': 'list', #在下载该影片的设备
-        'dled': 'list', #已完成下载的设备
-        'play_num': 'dict', # 每个设备可供播放数量
-        'title_py': 'string', #标题全拼
-        'title_pyshow': 'list', #标题全拼 数组
-        'title_sp': 'string', #标题首拼
-        'imgs': 'dict', #已完成封面图片下载的设备
-        'non_py': 'bool', #True 不对该内容产生拼音
-        'created_uid': 'string', #自定义影片集创建设备 uid
-    }
-
-    # 影片内容
-    _videoListFields = {
-        'setId': 'objectid', #ideo_set 剧集 _id,
-        'name': 'string', #影片名称 
-        'summary': 'string', #影片介绍
-        'link': 'string', #影片播放地址
-        'img': 'string', #影片封面图
-        'created_at': 'int', #影片发布时间
-        'duration': 'string', #'影片时间 例 01:10 没有不写该字段'
-        'name_sp': 'string', #影片名首拼
-        'name_py': 'string', #影片名全拼
-        'name_pyshow': 'list',#影片名数组
-        'plays': 'dict', #每个设备该影片的播放地址
-        'imgs': 'dict', #每个设备该影片的封面图
-        'non_py': 'bool', #True 不对该内容产生拼音
-    }
-
+class Db(Straw):
     # 任务
     _taskFields = {
         'videoIds': 'string', #待操作的 视频
@@ -87,9 +38,6 @@ class db():
 
     def __init__(self):
         pass
-        # 手动执行
-        # if __name__ == "__main__":
-        #     pass
 
     # 连接表
     def connect(self, table):
@@ -97,73 +45,14 @@ class db():
         if self._collection[table]:
             return self._collection[table]
 
-        client = MongoClient(config.mongo_client)
+        config = self.getConfig('DB')
+        client = MongoClient(config['mongoClient'])
         if not self._db:
-            self._db = client[config.db] # 连接库
+            self._db = client[config['dbName']] # 连接库
 
         self._collection[table] = self._db[table] # 选择表
         return self._collection[table]
 
-
-    # 影片集合
-    def saveVideoSet(self, data, platform):
-        if not isinstance(data, dict):
-            print('Data must be a dict')
-            return False
-
-        _collection = self.connect('video_set')
-        requireFields = ['title', 'link', 'summary', 'link', 'img', 'episode_over', 'is_vip', 'area', 'lang']
-        # assert common.checkRequire(data, requireFields)
-        requireCheckRe = common.checkRequire(data, requireFields)
-        if True != requireCheckRe:
-            print('{} Require field {} not found'.format('saveVideoSet', requireCheckRe))
-            return False
-        data = common.removeUnsafeFields(data, self._videoSetFields.keys(), self._videoSetFields)
-        # 哪个平台的
-        data['platform'] = int(platform)
-        # 是否存在相同名称的 集合
-        # exist = 0
-        exists = _collection.find_one({"title": data['title'], 'platform': data['platform']})
-        if not exists:
-            return _collection.insert(data)
-        else:
-            return False
-
-    # 各影片分片
-    def saveVideoList(self, data):
-        if not isinstance(data, list):
-            print('Data must be a list')
-            return False
-
-        _collection = self.connect('video_list')
-        requireFields = ['setId', 'name', 'summary', 'link', 'img']
-        # assert common.checkRequire(data, requireFields)
-        requireCheckRe = common.checkRequire(data, requireFields)
-        if True != requireCheckRe:
-            print('{} Require field {} not found'.format('saveVideoList', requireCheckRe))
-            return False
-        data = common.removeUnsafeFields(data, self._videoListFields.keys(), self._videoListFields)
-        return _collection.insert_many(data)
-
-    # 分集在剧集下是否存在
-    def videoListExists(self, name, setId):
-        _collection = self.connect('video_list')
-        # @todo test video list exists do name eq
-        exists = _collection.find_one({"name": common.conv2(name, self._videoListFields['name']), 'setId': common.conv2(setId, self._videoListFields['setId'])})
-        return True if exists else False
-
-    # 更新总集数
-    def modifyEpisode(self, data, _id):
-        if not data['episode']:
-            return False
-        _collection = self.connect('video_set')
-        modify = _collection.update_one({"_id": _id}, {"$set": {"episode": common.conv2(data['episode'], self._videoSetFields['episode'])}})
-        return True if modify else False
-
-    #删除影片集
-    def rmSet(self, _id):
-        _collection = self.connect('video_set')
-        return _collection.delete_one({"_id": _id})
 
 
     # 获取所有 set 内容 拼音不存在的

@@ -32,7 +32,7 @@ MANIFEST
 *.iml
 
 # VS Code related files
-.vscode
+.vscode/
 
 Runtime/
 

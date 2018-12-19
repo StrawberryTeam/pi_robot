@@ -27,7 +27,7 @@ class Run(Straw):
         # 测试用 end
 
         # 根据传入参数拉起一个任务
-        taskFactory = self.getFactory(self._taskType.capitalize())(self._taskName.capitalize())
+        taskFactory = self.getFactory(self._taskType.capitalize())(self._taskName.capitalize(), isTest = self._test)
         # 拉起执行方法
         getattr(taskFactory, self._process)(self._args)
 

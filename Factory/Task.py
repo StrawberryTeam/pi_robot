@@ -11,8 +11,9 @@ class Task(TaskProtocol, Straw):
     '''
     _taskObj = {}
     _taskName = None
+    _isTest = False
 
-    def __init__(self, taskName):
+    def __init__(self, taskName, isTest = False):
         super().__init__()
         '''
         初始化任务类 
@@ -23,11 +24,13 @@ class Task(TaskProtocol, Straw):
         self._taskObj = getattr(taskObj, taskName)()
         if not isinstance(self._taskObj, TaskProtocol):
             raise TypeError('Task must instance of TaskProtocol')
+        self._isTest = isTest
 
     def getCategoryList(self, args):
         '''
         一次性获取所有分类内容
         '''
+        Util.info("Task:{} getCategoryList args {}".format(self._taskName, args))
         if not self._taskObj.cateLinks or len(self._taskObj.cateLinks) == 0:
             Util.error('Task:{} cateLinks can not empty on getCategoryList'.format(self._taskName))
 
@@ -60,15 +63,17 @@ class Task(TaskProtocol, Straw):
         '''
         获取本影片集信息, 保存影片集信息
         '''
-        setInfo = self._taskObj.getSetContent(link)
-        print(setInfo)
-        pass
+        Util.info("Task:{} getSetContent link {}".format(self._taskName, link))
+        seterId = self._taskObj.getSetContent(link)
 
-    def getSetList(self, setInfo):
-        '''
-        获取影片集影片列表
-        '''
-        pass
+        Util.info("Task:{} getSetContent end".format(self._taskName))
+        if False != seterId:
+            self.getVideoList(seterId, link)
 
-    def getVideoList(self, link, startPage = 1, endPage = None):
-        pass
+    def getVideoList(self, seterId, setLink):
+        '''
+        获取影片集下的所有影片列表
+        '''
+        Util.info("Task:{} getVideoList seterId {}".format(self._taskName, seterId))
+        self._taskObj.getVideoList(seterId, setLink)
+        Util.info("Task:{} getVideoList end".format(self._taskName))
