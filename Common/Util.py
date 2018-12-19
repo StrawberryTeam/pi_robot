@@ -39,12 +39,13 @@ class Util(Straw):
             # @todo urlopen 使用 Proxy 的选项
             res = urllib2.urlopen(link)
         else:
-            res = requests.get(link, proxies=proxies if True == proxy else False)
             try:
+                res = requests.get(link, proxies=proxies if True == proxy else False)
                 res.raise_for_status()
             except res.exceptions.HTTPError as e:
                 # Whoops it wasn't a 200
-                return "Error: " + str(e)
+                Util.error("Get page error: {}".format(str(e)))
+                return False
         if True == isJson:
             res = res.json()
         return res

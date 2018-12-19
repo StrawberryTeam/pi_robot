@@ -162,14 +162,16 @@ class Iqiyi(TaskProtocol, Straw):
             r = Util.getPage(url, proxy=self._isProxy)
             # 变为 json
             r = json.loads(r.text.replace('var tvInfoJs=', ''))
-            # 没有内容了
+
             if not r or 'data' not in r:
                 Util.info('Video is empty {}'.format(url))
-                break
+                continue
             # 所有内容
             """
             {'mdown': 0, 'vn': '汪汪队立大功全集 第1集', 'vpic': 'http://pic4.qiyipic.com/image/20170923/55/5b/v_111715119_m_601_m1.jpg', 'lgh': [], 'vurl': 'http://www.iqiyi.com/v_19rralnqpo.html', 'purType': 0, 'payMark': 0, 'id': 608736400, 'plcdown': {'17': 0, '15': 0}, 'desc': '精通科技的10岁男孩Ryder在拯救了6条小狗之后，将他们训练成了一组本领高强的狗狗巡逻队。每个小狗都性格鲜明，也各有特长。斑点狗Marshall擅长火中急救；斗牛犬Rubble精通工程机械；牧羊犬Chase是个超级特工；混血儿Rocky是个维修能手；拉布拉多犬Zuma最熟悉水中救援；而可卡颇犬Skye掌握着各种航空技术。拥有这么多解决问题的能力，在加上Ryder提供的炫酷装备支持，不管遇到多么困难和危险的救援任务，他们还总是忘不了相互玩闹，制作轻松的气氛，而每次幽默乐观的狗狗能总能顺利完成任务。', 'pds': '1', 'vt': '海上救援', 'shortTitle': '汪汪队立大功全集 第1集', 'isProduced': 0, 'pd': 1, 'tvQipuId': 608736400, 'type': '1', 'vid': 'e50a9d800b84f5bc42b0b87a82df5dac', 'exclusive': 0, 'videoFocuses': [], 'publishTime': 1485254688000, 'timeLength': 660, 'wmarkPos': 0}
             """
+            if 0 == r['data']['pn']:
+                break
             # 更新总集数数据
             if page == 1:
                 self.getModel('VideoSet').modifyEpisode({'episode': r['data']['allNum'] if r['data']['allNum'] else 1}, seterId)
