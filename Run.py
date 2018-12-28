@@ -20,9 +20,9 @@ class Run(Straw):
         self.parseArgs()
 
         # 测试用
-        self._taskType = 'task'
-        self._taskName = 'iqiyi'
-        self._process = 'getSetContent'
+        self._taskType = 'download'
+        self._taskName = ''
+        self._process = 'dlFile'
         self._args = 'http://www.iqiyi.com/a_19rrhanaux.html#vfrm=2-4-0-1'
         # 测试用 end
 

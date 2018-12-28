@@ -10,6 +10,7 @@ import random
 import string
 import time
 import hashlib
+import os
 
 class Util(Straw):
     
@@ -178,3 +179,18 @@ class Util(Straw):
         @todo 入 mongodb / es 查看
         '''
         print(msg)
+
+    # 转为 mp4 
+    @staticmethod
+    def convertToMp4(self, dlPath, inputFile):
+        config = Straw.getConfig(Straw, 'TASK')
+        outputFile = Util.genRandName(10) #重新命名
+        rInputFile = os.path.join(config.fileDir, dlPath, inputFile) #完整路径
+        rOutputFile = "{}.mp4".format(os.path.join(config.fileDir, dlPath, outputFile)) #完整路径
+        Util.info('开始转码 {}'.format(inputFile))
+        try:
+            os.system("ffmpeg -i {} -acodec aac -ab 128k -vcodec libx264 -f mp4 -s hd480 {}".format(rInputFile, rOutputFile))
+        except:
+            Util.error('转码失败')
+        os.remove(rInputFile)
+        return "{}.mp4".format(outputFile)
