@@ -14,18 +14,20 @@ from Common.Straw import Straw
 from Common.Util import Util
 
 
-class Downloader(DownloadProtocol, Straw):
+class Youget(DownloadProtocol, Straw):
     '''
-    youget 下载器
+    Youget 下载器
     '''
 
     _db = {}
-    def __init__(self):
-        print('Do youget downloader')
+    def __init__(self, args):
+        print(args)
+        print('Do Youget downloader')
 
 
     # 下载文件
-    def dlFile(self, platform):
+    def dlFile(self, args):
+        exit()
         # data = self._db.getUnDlRes(self._uid, platform)
         # if False == data:
         #     print('该设备 {} 没有需要下载的资源'.format(self._uid))

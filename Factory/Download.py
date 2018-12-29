@@ -42,14 +42,14 @@ class Download(DownloadProtocol, Straw):
         初始化任务类 
         taskName 任务类名
         '''
-        self._taskName = taskName
-        taskObj = importlib.import_module('.{}'.format(taskName), 'Service.Download')
+        self._taskName = taskName.capitalize()
         # 未指定下载器
-        if not taskName:
-            taskName = self._dlMatchines[0]
+        if not self._taskName:
+            self._taskName = self._dlMatchines[0].capitalize()
 
+        taskObj = importlib.import_module('.{}'.format(self._taskName), 'Service.Download')
         # 指定一个下载器
-        self.getNewMatchine(taskObj, taskName)
+        self.getNewMatchine(taskObj, self._taskName)
 
         self._isTest = isTest
 

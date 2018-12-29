@@ -19,9 +19,9 @@ class Task(TaskProtocol, Straw):
         初始化任务类 
         taskName 任务类名
         '''
-        self._taskName = taskName
-        taskObj = importlib.import_module('.{}'.format(taskName), 'Service.Task')
-        self._taskObj = getattr(taskObj, taskName)()
+        self._taskName = taskName.capitalize()
+        taskObj = importlib.import_module('.{}'.format(self._taskName), 'Service.Task')
+        self._taskObj = getattr(taskObj, self._taskName)()
         if not isinstance(self._taskObj, TaskProtocol):
             raise TypeError('Task must instance of TaskProtocol')
         self._isTest = isTest
