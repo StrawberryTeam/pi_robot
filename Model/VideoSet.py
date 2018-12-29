@@ -14,7 +14,7 @@ class VideoSet(Db):
 
 
     # 影片集
-    _videoSetFields = {
+    videoSetFields = {
         'title': 'string', #剧集名
         'summary': 'string', #剧集内容介绍
         'link': 'string', #内容页地址
@@ -56,7 +56,7 @@ class VideoSet(Db):
         if True != requireCheckRe:
             Util.error('{} Require field {} not found'.format('saveVideoSet', requireCheckRe))
             return False
-        data = Util.removeUnsafeFields(data, self._videoSetFields.keys(), self._videoSetFields)
+        data = Util.removeUnsafeFields(data, self.videoSetFields.keys(), self.videoSetFields)
         # 哪个平台的
         data['platform'] = int(platform)
         setId = self._db.insert(data)
@@ -65,8 +65,8 @@ class VideoSet(Db):
     # 影片集是否已存在
     def exists(self, title, platform):
         exists = self._db.find_one({
-            "title": Util.conv2(title, self._videoSetFields['title']), 
-            'platform': Util.conv2(platform, self._videoSetFields['platform'])
+            "title": Util.conv2(title, self.videoSetFields['title']), 
+            'platform': Util.conv2(platform, self.videoSetFields['platform'])
             })
         return True if exists else False
 
@@ -84,3 +84,49 @@ class VideoSet(Db):
         if not isinstance(_id, ObjectId):
             _id = ObjectId(_id)
         return self._db.delete_one({"_id": _id})
+
+
+    # 查询可下载的集
+    def getUnDlRes(self, uid, platform):
+        # setMap = {}
+        # 需要根据平台来查询 
+        # 取一个 本设备下载量小于已更新集数的 剧集
+        # pipe = [{
+        #     '$project': {
+        #         'cmp': {'$cmp': ['$play_num.' + str(uid), '$episode']},
+        #         'platform': 1}
+        #     }, {'$match': {'cmp': {'$lt': 0}, 'platform': int(platform)}}, {'$limit': 1}]
+        # setList = _collection.aggregate(pipeline=pipe)
+        # setList = list(setList)[0]
+        # 现在在后台添加 下载中 状态 dl [uid,uid2,uid3] 查看该平台需要下载的即可
+        setDict = self._db.find_one({"dl": str(uid), "platform": int(platform)})
+        if not setDict:
+            return False
+
+        # 找一个未下载的单集
+        listItem = self.getModel('VideoList').getUnDlVideo(setDict['_id'], uid)
+        if not listItem:
+            # 修正 play_num
+            listCount = self.getModel('VideoList').getDledVideoListCount(setDict['_id'], uid)
+            # 影片集还在下载中 但没有单集 更新影片集信息 认为已经下载完成 @2018.3.3
+            self.setVSetDled(setDict['_id'], uid, listCount)
+            print("未找到影片集未下载影片内容, 已修正影片集为下载完成 {}".format(setDict))
+            return False
+
+        return listItem
+
+
+    # 设置为下载完成
+    def setVSetDled(self, setId, uid, play_num = False):
+        uid = str(uid)
+        upMap = {"_id": ObjectId(setId)} 
+        # 已全部下载完成
+        # 移出下载中
+        self._db.update(upMap, {"$pull": {"dl": uid}})
+        # 添加已完成
+        self._db.update(upMap, {"$push": {"dled": uid}})
+            
+        # 需要重新更新 play_num
+        if play_num != False:
+            self._db.update_one(upMap, {"$set": {"play_num." + uid : int(play_num)}})
+        return True

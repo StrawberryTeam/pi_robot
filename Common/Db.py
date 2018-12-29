@@ -127,38 +127,6 @@ class Db(Straw):
         modify = _collection.update_one({"_id": _id}, {"$set": {"imgs." + str(uid): data['img']}})
         return True if modify else False
 
-    # 查询可下载的集
-    def getUnDlRes(self, uid, platform):
-        _collection = self.connect('video_set')
-        # setMap = {}
-        # 需要根据平台来查询 
-        # 取一个 本设备下载量小于已更新集数的 剧集
-        # pipe = [{
-        #     '$project': {
-        #         'cmp': {'$cmp': ['$play_num.' + str(uid), '$episode']},
-        #         'platform': 1}
-        #     }, {'$match': {'cmp': {'$lt': 0}, 'platform': int(platform)}}, {'$limit': 1}]
-        # setList = _collection.aggregate(pipeline=pipe)
-        # setList = list(setList)[0]
-        # 现在在后台添加 下载中 状态 dl [uid,uid2,uid3] 查看该平台需要下载的即可
-        setList = _collection.find_one({"dl": str(uid), "platform": int(platform)})
-        if not setList:
-            return False
-
-        del _collection
-        # 查 list
-        _collection = self.connect('video_list')
-        # 找一个未下载的单集
-        listItem = _collection.find_one({"setId": common.conv2(setList['_id'], self._videoListFields['setId']), "plays." + str(uid): {'$exists': False}})
-        if not listItem:
-            # 修正 play_num
-            listCount = _collection.find({"setId": common.conv2(setList['_id'], self._videoListFields['setId']), "plays." + str(uid): {'$exists': True}}).count()
-            # 影片集还在下载中 但没有单集 更新影片集信息 认为已经下载完成 @2018.3.3
-            self.setVSetDled(setList['_id'], uid, listCount)
-            print("未找到影片集未下载影片内容, 已修正影片集为下载完成 {}".format(setList))
-            return False
-
-        return listItem
 
     # 新的可播放 单集 
     # data 本设备 播放地址
@@ -178,21 +146,6 @@ class Db(Straw):
             self.setVSetDled(setId, uid)
         return True
 
-    # 设置为下载完成
-    def setVSetDled(self, setId, uid, play_num = False):
-        _collection = self.connect('video_set')
-        uid = str(uid)
-        upMap = {"_id": ObjectId(setId)} 
-        # 已全部下载完成
-        # 移出下载中
-        _collection.update(upMap, {"$pull": {"dl": uid}})
-        # 添加已完成
-        _collection.update(upMap, {"$push": {"dled": uid}})
-            
-        # 需要重新更新 play_num
-        if play_num != False:
-            _collection.update_one(upMap, {"$set": {"play_num." + uid : int(play_num)}})
-        return True
 
 
     # # 修复用 start

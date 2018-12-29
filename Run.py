@@ -11,7 +11,7 @@ class Run(Straw):
     _taskType = None # 当前待执行的任务类型 task / download / background / front
     _taskName = None # 当前待执行任务名 iqiyi / youku / download
     _process = None # 当前待执行的任务 getSetContent 若为空则执行默认方法
-    _args = None # 当前任务的参数 tuple
+    _args = None # 当前任务的参数 tuple or dict
     _test = False # True 不执行写入操作，而是立即返回结果
 
     def __init__(self):
@@ -23,7 +23,7 @@ class Run(Straw):
         self._taskType = 'download'
         self._taskName = ''
         self._process = 'dlFile'
-        self._args = 'http://www.iqiyi.com/a_19rrhanaux.html#vfrm=2-4-0-1'
+        self._args = ''#{'videoId': '5c19fddde203c64bdc192997'}
         # 测试用 end
 
         # 根据传入参数拉起一个任务

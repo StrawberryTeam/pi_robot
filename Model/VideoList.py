@@ -13,7 +13,7 @@ class VideoList(Db):
         self._db = self.connect('video_list')
 
     # 影片内容
-    _videoListFields = {
+    videoListFields = {
         'setId': 'objectid', #ideo_set 剧集 _id,
         'name': 'string', #影片名称 
         'summary': 'string', #影片介绍
@@ -42,15 +42,28 @@ class VideoList(Db):
         if True != requireCheckRe:
             Util.error('{} Require field {} not found'.format('saveVideoList', requireCheckRe))
             return False
-        data = Util.removeUnsafeFields(data, self._videoListFields.keys(), self._videoListFields)
+        data = Util.removeUnsafeFields(data, self.videoListFields.keys(), self.videoListFields)
         return self._db.insert_many(data)
 
     # 分集在剧集下是否存在
     def exists(self, name, setId):
         exists = self._db.find_one({
-            "name": Util.conv2(name, self._videoListFields['name']), 
-            'setId': Util.conv2(setId, self._videoListFields['setId'])
+            "name": Util.conv2(name, self.videoListFields['name']), 
+            'setId': Util.conv2(setId, self.videoListFields['setId'])
             })
         return True if exists else False
 
+    # 获取一个影片内容
+    def getVideo(self, _id):
+        if not isinstance(_id, ObjectId):
+            _id = ObjectId(_id)
+        return self._db.find_one({"_id": _id})
 
+    # 获取本设备未下载的影片 
+    def getUnDlVideo(self, setId, uid):
+        return self._db.find_one({"setId": Util.conv2(setId, self.videoListFields['setId']), "plays." + str(uid): {'$exists': False}})
+
+    # 获取本设备已下载的影片数
+    def getDledVideoListCount(self, setId, uid):
+        listCount = self._db.find({"setId": Util.conv2(setId, self.videoListFields['setId']), "plays." + str(uid): {'$exists': True}}).count()
+        return listCount

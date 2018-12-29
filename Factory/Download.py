@@ -7,6 +7,7 @@ from Common.Util import Util
 import platform, os
 import ctypes
 import math
+import time
 
 class Download(DownloadProtocol, Straw):
     '''
@@ -16,22 +17,8 @@ class Download(DownloadProtocol, Straw):
     _taskName = None
     _isTest = False
 
-    # 下载器 id
-    _uid = None
-
-    # 可用 分类 (风行 cid = 2 会自动下载剧集中的全部影片，计划任务中先不下载风行的影片)
-    _cateIds = []
-
     # 下载文件不需要加 .mp4 后缀的 cate
     _notMp4 = [3, 6, 9] 
-
-    # 需要代理的 cate
-    _proxyIds = []
-
-    # 代理地址:端口
-    _proxyInfo = None
-
-    _params = {}
 
     # 可用的下载器
     _dlMatchines = ['youget', 'youtubedl']
@@ -54,20 +41,23 @@ class Download(DownloadProtocol, Straw):
         self._isTest = isTest
 
 
+    configList = {}
     # 获取一个新的下载器
     def getNewMatchine(self, taskObj, taskName):
-        configList = {}
         config = self.getConfig()
-        configList['uid'] = config.UID
-        configList['cateIds'] = config.CATE_IDS
-        configList['proxyIds'] = config.PROXY_IDS
-        configList['proxyInfo'] = "{}:{}".format(config.PROXY['proxyHost'], config.PROXY['proxyPort'])
-        configList['params'] = {
-            'youget': config.TASK['youGet'],
-            'youtubedl': config.TASK['youTubeDl'],
-            'dir': config.TASK['fileDir']
+        self.configList = {
+            'uid': config.UID,
+            'cateIds': config.CATE_IDS,
+            'proxyIds': config.PROXY_IDS,
+            'proxyInfo': "{}:{}".format(config.PROXY['proxyHost'], config.PROXY['proxyPort']),
+            'notMp4': self._notMp4,
+            'params': {
+                'youget': config.TASK['youGet'],
+                'youtubedl': config.TASK['youTubeDl'],
+                'dir': config.TASK['fileDir']
+            }
         }
-        self._taskObj = getattr(taskObj, taskName)(configList)
+        self._taskObj = getattr(taskObj, taskName)(self.configList)
         if not isinstance(self._taskObj, DownloadProtocol):
             raise TypeError('Task must instance of DownloadProtocol')
 
@@ -80,8 +70,34 @@ class Download(DownloadProtocol, Straw):
         dlMachine 指定下载方法 youget / youtubedl 默认自动，即不可用时切换
         toHouseware 上传至仓库
         '''
+        if 'videoId' in args:
+            # 指定视频 
+            videoInfo = self.getModel('VideoList').getVideo(args['videoId'])
+        else:
+            # 获取一个未下载的视频 @todo 平台/获取规则 修改
+            videoInfo = self.getModel('VideoSet').getUnDlRes(self.configList['uid'], 1)
+
+        if not videoInfo:
+            Util.info('该设备 {} 没有需要下载的资源'.format(self.configList['uid']))
+            exit()
+
         Util.info("Download:{} dlFile".format(self._taskName))
-        self._taskObj.dlFile(args)
+        Util.info("正在下载影片 {}, videoId: {} setId: {}".format(videoInfo['name'], videoInfo['_id'], videoInfo['setId']))
+        # 月日 文件夹
+        dlPath = time.strftime("%m%d", time.localtime())
+        # 绝对路径
+        rdlPath = os.path.join(self.configList['params']['dir'], dlPath)
+        if not os.path.exists(rdlPath):
+            os.mkdir(rdlPath)
+        # 文件名重新命名
+        fileName = Util.genRandName(11) # 10位文件夹的 video 为 17版本 11位的为 18版本
+        rfileName = fileName + '.mp4' # 写入数据库的 名称
+        dlfileName = fileName # 下载时用的名称
+        if int(platform) not in self.configList['notMp4']: # 乐视不需要 .mp4
+            Util.info('File Add .mp4')
+            dlfileName = rfileName
+
+        self._taskObj.dlFile(videoInfo['link'], rdlPath, rfileName, fileName, toWarehouse =  True if 'toHouseware' in args else False)
         Util.info("Download:{} dlFile end".format(self._taskName))
 
 
