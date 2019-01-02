@@ -113,6 +113,7 @@ class VideoSet(Db):
             print("未找到影片集未下载影片内容, 已修正影片集为下载完成 {}".format(setDict))
             return False
 
+        listItem['platform'] = setDict['platform']
         return listItem
 
 
@@ -130,3 +131,18 @@ class VideoSet(Db):
         if play_num != False:
             self._db.update_one(upMap, {"$set": {"play_num." + uid : int(play_num)}})
         return True
+
+    # 总剧集 可播放数  + 1
+    def setCanPlayNum(self, setId, uid):
+        upMap = {"_id": ObjectId(setId)} 
+        self._db.update_one(upMap, {"$inc": {"play_num." + str(uid) : 1}})
+        # 查看已下载数量 是否 大于等于 总数量 ，如果 是标记为 已下载完成
+        item = self._db.find_one(upMap)
+        if item['play_num'][uid] >= item['episode']: # 使用 video list num 替代 episode 值 
+            self.setVSetDled(setId, uid)
+        return True
+
+    # 获取影片集信息
+    def getSetInfo(self, setId):
+        item = self._db.find_one({"_id": ObjectId(setId)})
+        return item if item else False

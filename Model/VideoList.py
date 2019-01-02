@@ -57,7 +57,12 @@ class VideoList(Db):
     def getVideo(self, _id):
         if not isinstance(_id, ObjectId):
             _id = ObjectId(_id)
-        return self._db.find_one({"_id": _id})
+        item =  self._db.find_one({"_id": _id})
+        setDict = self.getModel('VideoSet').getSetInfo(item['setId'])
+        print(setDict)
+        item['platform'] = setDict['platform']
+        return item
+
 
     # 获取本设备未下载的影片 
     def getUnDlVideo(self, setId, uid):
@@ -67,3 +72,9 @@ class VideoList(Db):
     def getDledVideoListCount(self, setId, uid):
         listCount = self._db.find({"setId": Util.conv2(setId, self.videoListFields['setId']), "plays." + str(uid): {'$exists': True}}).count()
         return listCount
+
+    # 新的可播放 单集 
+    # data 本设备 播放地址
+    def newPlay(self, _id, uid, data):
+        # 更新已下载（可播放）数量
+        return self._db.update_one({"_id": _id}, {"$set": {"plays." + str(uid): data}})

@@ -13,3 +13,10 @@ class DownloadProtocol(metaclass=ABCMeta):
         开始下载过程
         '''
         pass
+
+    @abstractmethod
+    def dlFileWithProxy(self):
+        '''
+        使用代理开始下载过程
+        '''
+        pass

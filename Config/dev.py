@@ -7,6 +7,8 @@
 # 所有环境
 UID = '2'
 
+HOUSEWARE_UID = 2
+
 # 可用的分类
 CATE_IDS = [
     1,  # iqiyi
@@ -22,7 +24,7 @@ PROXY = {
     # 代理地址
     'proxyHost': "127.0.0.1",
     # 代理端口
-    'proxyPort': 1080,
+    'proxyPort': '1080',
 }
 
 DB = {
@@ -31,7 +33,7 @@ DB = {
 }
 
 # 需要代理的 ids
-PROXY_IDS = [1,3,6]
+PROXY_IDS = [1,3]
 
 TASK = {
     # 需要下载图片的 ids

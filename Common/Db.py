@@ -128,23 +128,7 @@ class Db(Straw):
         return True if modify else False
 
 
-    # 新的可播放 单集 
-    # data 本设备 播放地址
-    def newPlay(self, _id, uid, data):
-        _collection = self.connect('video_list')
-        # 更新已下载（可播放）数量
-        return _collection.update_one({"_id": _id}, {"$set": {"plays." + str(uid): data}})
 
-    # 总剧集 可播放数  + 1
-    def setCanPlayNum(self, setId, uid):
-        _collection = self.connect('video_set')
-        upMap = {"_id": ObjectId(setId)} 
-        _collection.update_one(upMap, {"$inc": {"play_num." + str(uid) : 1}})
-        # 查看已下载数量 是否 大于等于 总数量 ，如果 是标记为 已下载完成
-        item = _collection.find_one(upMap)
-        if item['play_num'][uid] >= item['episode']: # 使用 video list num 替代 episode 值 
-            self.setVSetDled(setId, uid)
-        return True
 
 
 

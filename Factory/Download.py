@@ -2,14 +2,14 @@
 #!/usr/bin/python3
 import importlib
 from Common.Straw import Straw
-from Protocol.DownloadProtocol import DownloadProtocol
 from Common.Util import Util
+from Protocol.DownloadProtocol import DownloadProtocol
 import platform, os
 import ctypes
 import math
 import time
 
-class Download(DownloadProtocol, Straw):
+class Download(Straw):
     '''
     执行任务类
     '''
@@ -51,6 +51,7 @@ class Download(DownloadProtocol, Straw):
             'proxyIds': config.PROXY_IDS,
             'proxyInfo': "{}:{}".format(config.PROXY['proxyHost'], config.PROXY['proxyPort']),
             'notMp4': self._notMp4,
+            'housewareUid': config.HOUSEWARE_UID,
             'params': {
                 'youget': config.TASK['youGet'],
                 'youtubedl': config.TASK['youTubeDl'],
@@ -90,14 +91,39 @@ class Download(DownloadProtocol, Straw):
         if not os.path.exists(rdlPath):
             os.mkdir(rdlPath)
         # 文件名重新命名
-        fileName = Util.genRandName(11) # 10位文件夹的 video 为 17版本 11位的为 18版本
+        fileName = Util.genRandName(11) # 10位文件夹的 video 为 17版本, 11位的为 18版本
         rfileName = fileName + '.mp4' # 写入数据库的 名称
         dlfileName = fileName # 下载时用的名称
-        if int(platform) not in self.configList['notMp4']: # 乐视不需要 .mp4
+        if int(videoInfo['platform']) not in self.configList['notMp4']: # 乐视不需要 .mp4
             Util.info('File Add .mp4')
             dlfileName = rfileName
 
-        self._taskObj.dlFile(videoInfo['link'], rdlPath, rfileName, fileName, toWarehouse =  True if 'toHouseware' in args else False)
+        # 是否使用代理
+        doDl = 'dlFile'
+        if int(videoInfo['platform']) in self.configList['proxyIds']:
+            doDl = 'dlFileWithProxy'
+
+        # 下载过程
+        dlStatus = getattr(self._taskObj, doDl)(videoInfo['link'], rdlPath, rfileName, fileName)
+            
+        # 下载完成后首先确认文件是否存在
+        if not os.path.exists(os.path.join(rdlPath, rfileName)):
+            Util.error('确认影片失败，需要重新下载该影片')
+            exit()
+
+        # 下载成功
+        if True == dlStatus:
+            # 下载完成写入新记录
+            self.getModel('VideoList').newPlay(videoInfo['_id'], self.configList['uid'], os.path.join(dlPath, rfileName))
+            # 影片集 总下载数  + 1
+            self.getModel("VideoSet").setCanPlayNum(videoInfo['setId'], self.configList['uid'])
+
+            # 下载至 houseware
+            if self.configList['uid'] == self.configList['housewareUid']:
+                pass
+
+            
+
         Util.info("Download:{} dlFile end".format(self._taskName))
 
 

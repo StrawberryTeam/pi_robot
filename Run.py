@@ -21,9 +21,9 @@ class Run(Straw):
 
         # 测试用
         self._taskType = 'download'
-        self._taskName = ''
+        self._taskName = 'youtubedl'
         self._process = 'dlFile'
-        self._args = ''#{'videoId': '5c19fddde203c64bdc192997'}
+        self._args = {'videoId': '5c19fddde203c64bdc192997'}
         # 测试用 end
 
         # 根据传入参数拉起一个任务
