@@ -30,6 +30,7 @@ class Download(Straw):
         taskName 任务类名
         '''
         self._taskName = taskName.capitalize()
+        self._isTest = isTest
         # 未指定下载器
         if not self._taskName:
             self._taskName = self._dlMatchines[0].capitalize()
@@ -38,7 +39,6 @@ class Download(Straw):
         # 指定一个下载器
         self.getNewMatchine(taskObj, self._taskName)
 
-        self._isTest = isTest
 
 
     configList = {}
@@ -94,6 +94,7 @@ class Download(Straw):
         fileName = Util.genRandName(11) # 10位文件夹的 video 为 17版本, 11位的为 18版本
         rfileName = fileName + '.mp4' # 写入数据库的 名称
         dlfileName = fileName # 下载时用的名称
+        #@todo 确认下载名称 和 下载类型，尽量下载更高清晰度的
         if int(videoInfo['platform']) not in self.configList['notMp4']: # 乐视不需要 .mp4
             Util.info('File Add .mp4')
             dlfileName = rfileName
@@ -104,7 +105,7 @@ class Download(Straw):
             doDl = 'dlFileWithProxy'
 
         # 下载过程
-        dlStatus = getattr(self._taskObj, doDl)(videoInfo['link'], rdlPath, rfileName, fileName)
+        dlStatus = getattr(self._taskObj, doDl)(videoInfo['link'], rdlPath, rfileName, dlfileName)
             
         # 下载完成后首先确认文件是否存在
         if not os.path.exists(os.path.join(rdlPath, rfileName)):
@@ -113,8 +114,10 @@ class Download(Straw):
 
         # 下载成功
         if True == dlStatus:
+            # 开始转码 转为 web 可用格式
+            webVideo = self.getService('Background/Convert').toMp4({'dlPath': dlPath, 'inputFile': rfileName})
             # 下载完成写入新记录
-            self.getModel('VideoList').newPlay(videoInfo['_id'], self.configList['uid'], os.path.join(dlPath, rfileName))
+            self.getModel('VideoList').newPlay(videoInfo['_id'], self.configList['uid'], webVideo)
             # 影片集 总下载数  + 1
             self.getModel("VideoSet").setCanPlayNum(videoInfo['setId'], self.configList['uid'])
 

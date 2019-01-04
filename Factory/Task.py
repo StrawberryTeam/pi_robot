@@ -20,11 +20,11 @@ class Task(TaskProtocol, Straw):
         taskName 任务类名
         '''
         self._taskName = taskName.capitalize()
+        self._isTest = isTest
         taskObj = importlib.import_module('.{}'.format(self._taskName), 'Service.Task')
         self._taskObj = getattr(taskObj, self._taskName)()
         if not isinstance(self._taskObj, TaskProtocol):
             raise TypeError('Task must instance of TaskProtocol')
-        self._isTest = isTest
 
     def getCategoryList(self, args):
         '''

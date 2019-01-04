@@ -7,6 +7,7 @@
 # 所有环境
 UID = '2'
 
+# 远程环境
 HOUSEWARE_UID = 2
 
 # 可用的分类
@@ -42,7 +43,10 @@ TASK = {
     'images_dir': 'files/images',
     # you-get 目录
     'youGet': 'you-get',
+    # youtube-dl 目录
     'youTubeDl': 'youtube-dl',
+    # ffmpeg 目录
+    'ffmpeg': 'ffmpeg',
     # 影片下载目录
     'fileDir': 'files'
 }
