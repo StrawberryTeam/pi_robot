@@ -1,8 +1,7 @@
-# pi_robot
-卡通世界内容抓取自动化机器人
+# pi_robot dev version
 
-开始一个新下载
+Run 
 
-```shell
-python3 dler/download.py
+```bash
+python3 Run.py
 ```
