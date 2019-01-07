@@ -17,7 +17,9 @@ class Setting(Db):
         'name': 'string', # 设备名
         'uid': 'string', # 设备号唯一
         'host': 'string', # 设备地址
-        'freeSpace': 'string', # 设备剩余空间 gb
+        'freeSpace': 'int', # 设备剩余空间 gb
+        'lastRepoId': 'string', # warehouse 编号 01,02,03
+        'lastRepoSize': 'int', # warehouse 已用空间 mb
     }
 
     # 设置设备剩余空间
@@ -25,5 +27,6 @@ class Setting(Db):
         return self._db.update_one({"uid": str(uid)}, {"$set": {'freeSpace': Util.conv2(space, self.settingFields['freeSpace'])}})
 
 
-
-
+    # 获取一个设备的信息
+    def getSetting(self, uid):
+        return self._db.find_one({'uid': str(uid)})

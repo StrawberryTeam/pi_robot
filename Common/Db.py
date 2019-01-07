@@ -30,7 +30,9 @@ class Db(Straw):
         # 影片列表
         'video_list': {},
         # task
-        'task': {}
+        'task': {},
+        # setting
+        'setting': {},
     }
 
     # 已连接 db
@@ -42,7 +44,7 @@ class Db(Straw):
     # 连接表
     def connect(self, table):
         # 已连接过的表
-        if table in self._collection:
+        if self._collection[table]:
             return self._collection[table]
 
         config = self.getConfig('DB')

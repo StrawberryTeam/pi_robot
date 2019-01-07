@@ -23,7 +23,7 @@ class Background(Straw):
         初始化任务类 
         taskName 任务类名
         '''
-        self._taskName = taskName.capitalize()
+        self._taskName = taskName
 
         self._isTest = isTest
 

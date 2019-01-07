@@ -12,6 +12,7 @@ import math
 from Protocol.DownloadProtocol import DownloadProtocol
 from Common.Straw import Straw
 from Common.Util import Util
+import subprocess
 
 
 class Youtubedl(DownloadProtocol, Straw):
@@ -43,21 +44,31 @@ class Youtubedl(DownloadProtocol, Straw):
         Util.info('Do {} downloader'.format(self._downloader))
         self._args = args
 
-    def dlFileWithProxy(self, link, rdlPath, rfileName, dlfileName):
-        Util.info("Dl with proxy {}".format(os.path.join(rdlPath, rfileName)))
-        dlStatus = os.system("{} {} -o {}/{}.%(ext)s -f bestvideo+bestaudio/best --proxy socks5://{}/".format(self._args['params']['youtubedl'], link, rdlPath, dlfileName, self._args['proxyInfo']))
-        if 0 == dlStatus:
-            return True
-        else:
+    def dlFileWithProxy(self, link, rdlPath, dlfileName):
+        Util.info("Dl with proxy")
+
+        filename = subprocess.check_output([self._args['params']['youtubeDl'], link, '--get-filename', '-o', '{}.%(ext)s'.format(dlfileName), '--proxy', 'socks5://{}/'.format(self._args['proxyInfo'])])
+        # 正常平台下载
+        try:
+            subprocess.check_call([self._args['params']['youtubeDl'], link, '-o', '{}/{}.%(ext)s'.format(rdlPath, dlfileName), '-f', 'bestvideo+bestaudio/best', '--proxy', 'socks5://{}/'.format(self._args['proxyInfo'])])
+        except subprocess.CalledProcessError as err:
+            Util.error(err) # 记录 Error 至 db
             Util.info('Youtubedl:影片未成功下载')
             return False
 
-    def dlFile(self, link, rdlPath, rfileName, dlfileName):
-        Util.info("Dl without proxy {}".format(os.path.join(rdlPath, rfileName)))
+        return filename.decode('UTF-8').strip()
+
+
+    def dlFile(self, link, rdlPath, dlfileName):
+        Util.info("Dl without proxy")
+
+        filename = subprocess.check_output([self._args['params']['youtubeDl'], link, '--get-filename', '-o', '{}.%(ext)s'.format(dlfileName)])
         # 正常平台下载
-        dlStatus = os.system("{} {} -o {}/{}.%(ext)s -f bestvideo+bestaudio/best".format(self._args['params']['youtubedl'], link, rdlPath, dlfileName))
-        if 0 == dlStatus:
-            return True
-        else:
+        try:
+            subprocess.check_call([self._args['params']['youtubeDl'], link, '-o', '{}/{}.%(ext)s'.format(rdlPath, dlfileName), '-f', 'bestvideo+bestaudio/best'])
+        except subprocess.CalledProcessError as err:
+            Util.error(err) # 记录 Error 至 db
             Util.info('Youtubedl:影片未成功下载')
             return False
+
+        return filename.decode('UTF-8').strip()

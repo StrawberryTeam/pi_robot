@@ -8,7 +8,7 @@
 UID = '2'
 
 # 远程环境
-HOUSEWARE = {
+WAREHOUSE = {
     'uid': '2',
     'token': ''
 }
@@ -43,15 +43,17 @@ TASK = {
     # 需要下载图片的 ids
     'needImgIds': [1, 9],
     # 图片下载目录
-    'images_dir': 'files/images',
+    'imagesDir': 'files/images',
     # you-get 目录
     'youGet': 'you-get',
     # youtube-dl 目录
-    'youTubeDl': 'youtube-dl',
+    'youtubeDl': 'youtube-dl',
     # ffmpeg 目录
     'ffmpeg': 'ffmpeg',
     # 影片下载目录
-    'fileDir': 'files'
+    'fileDir': 'files',
+    # warehouse repo
+    'repoDir': 'repos',
 }
 
 # 休息时间段 7点 8点 ...

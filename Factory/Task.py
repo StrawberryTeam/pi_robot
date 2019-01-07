@@ -19,7 +19,7 @@ class Task(TaskProtocol, Straw):
         初始化任务类 
         taskName 任务类名
         '''
-        self._taskName = taskName.capitalize()
+        self._taskName = taskName
         self._isTest = isTest
         taskObj = importlib.import_module('.{}'.format(self._taskName), 'Service.Task')
         self._taskObj = getattr(taskObj, self._taskName)()

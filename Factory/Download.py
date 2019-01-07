@@ -26,7 +26,7 @@ class Download(Straw):
         初始化任务类 
         taskName 任务类名
         '''
-        self._taskName = taskName.capitalize()
+        self._taskName = taskName
         self._isTest = isTest
         # 未指定下载器
         if not self._taskName:
@@ -49,8 +49,8 @@ class Download(Straw):
             'proxyInfo': "{}:{}".format(config.PROXY['proxyHost'], config.PROXY['proxyPort']),
             'warehouse': config.WAREHOUSE,
             'params': {
-                'youget': config.TASK['youGet'],
-                'youtubedl': config.TASK['youTubeDl'],
+                'youGet': config.TASK['youGet'],
+                'youtubeDl': config.TASK['youtubeDl'],
                 'dir': config.TASK['fileDir']
             }
         }
@@ -89,26 +89,35 @@ class Download(Straw):
             os.mkdir(rdlPath)
         # 文件名重新命名
         fileName = Util.genRandName(11) # 10位文件夹的 video 为 17版本, 11位的为 18版本
-        rfileName = fileName + '.mp4' # 写入数据库的 名称
 
         # 是否使用代理
         doDl = 'dlFile'
         if int(videoInfo['platform']) in self.configList['proxyIds']:
             doDl = 'dlFileWithProxy'
 
+        Util.info("Download to {}".format(os.path.join(rdlPath, fileName)))
         # 下载过程
-        dlStatus = getattr(self._taskObj, doDl)(videoInfo['link'], rdlPath, rfileName, fileName)
+        dlFileName = getattr(self._taskObj, doDl)(videoInfo['link'], rdlPath, fileName)
             
         # 下载完成后首先确认文件是否存在
-        if not os.path.exists(os.path.join(rdlPath, rfileName)):
+        if not os.path.exists(os.path.join(rdlPath, dlFileName)):
             Util.error('确认影片失败，需要重新下载该影片')
             return False
 
         switchMatchine = True
         # 下载成功
-        if True == dlStatus:
+        if False == dlFileName:
+            # 每次执行允许切换一次
+            if False == switchMatchine:
+                return False
+            switchMatchine = False
+            # 换下载方法进行下载
+            tmpMatchine = self._dlMatchines
+            tmpMatchine.remove(self._taskName.lower())
+            return self.getNewMatchine(tmpMatchine[0].capitalize())
+        else:
             # 开始转码 转为 web 可用格式
-            webVideo = self.getService('Background.Convert').toMp4({'dlPath': dlPath, 'inputFile': rfileName})
+            webVideo = self.getService('Background.Convert').toMp4({'dlPath': dlPath, 'inputFile': dlFileName})
             # 下载完成写入新记录
             self.getModel('VideoList').newPlay(videoInfo['_id'], self.configList['uid'], webVideo)
             # 影片集 总下载数  + 1
@@ -120,15 +129,6 @@ class Download(Straw):
 
             Util.info("Download:{} dlFile end".format(self._taskName))
             self.getFreeDisk()
-        else:
-            # 每次执行允许切换一次
-            if False == switchMatchine:
-                return False
-            switchMatchine = False
-            # 换下载方法进行下载
-            tmpMatchine = self._dlMatchines
-            tmpMatchine.remove(self._taskName.lower())
-            return self.getNewMatchine(tmpMatchine[0].capitalize())
             
 
     # 获取剩余空间 当前磁盘
