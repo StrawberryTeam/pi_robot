@@ -18,5 +18,15 @@ class ToWarehouse(Straw):
     创建仓库，并上传本地文件至远程仓库
     '''
 
-    def __init__(self, args):
+    _config = {}
+    def __init__(self):
+        self._config = self.getConfig('WAREHOUSE')
+        pass
+
+    # 处理文件
+    def process(self, args):
+        pass
+
+    # 创建本地仓库
+    def createRepo(self):
         pass

@@ -37,3 +37,4 @@ MANIFEST
 Runtime/
 
 Config/Config.py
+Config/*.py

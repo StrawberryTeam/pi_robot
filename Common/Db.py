@@ -42,7 +42,7 @@ class Db(Straw):
     # 连接表
     def connect(self, table):
         # 已连接过的表
-        if self._collection[table]:
+        if table in self._collection:
             return self._collection[table]
 
         config = self.getConfig('DB')

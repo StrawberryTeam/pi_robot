@@ -45,20 +45,19 @@ class Youtubedl(DownloadProtocol, Straw):
 
     def dlFileWithProxy(self, link, rdlPath, rfileName, dlfileName):
         Util.info("Dl with proxy {}".format(os.path.join(rdlPath, rfileName)))
-        try:
-            os.system("{} {} -o {}/{}.mp4 -f mp4 --proxy socks5://{}/".format(self._args['params']['youtubedl'], link, rdlPath, dlfileName, self._args['proxyInfo']))
-        except:
-            Util.info('影片未成功下载')
+        dlStatus = os.system("{} {} -o {}/{}.%(ext)s -f bestvideo+bestaudio/best --proxy socks5://{}/".format(self._args['params']['youtubedl'], link, rdlPath, dlfileName, self._args['proxyInfo']))
+        if 0 == dlStatus:
+            return True
+        else:
+            Util.info('Youtubedl:影片未成功下载')
             return False
 
     def dlFile(self, link, rdlPath, rfileName, dlfileName):
         Util.info("Dl without proxy {}".format(os.path.join(rdlPath, rfileName)))
-        try:
-            # 正常平台下载
-            os.system("{} {} -o {}/{}.mp4 -f mp4".format(self._args['params']['youtubedl'], link, rdlPath, dlfileName))
-        except:
-            Util.info('影片未成功下载')
+        # 正常平台下载
+        dlStatus = os.system("{} {} -o {}/{}.%(ext)s -f bestvideo+bestaudio/best".format(self._args['params']['youtubedl'], link, rdlPath, dlfileName))
+        if 0 == dlStatus:
+            return True
+        else:
+            Util.info('Youtubedl:影片未成功下载')
             return False
-
-        # 下载成功
-        return True

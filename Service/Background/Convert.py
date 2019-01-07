@@ -39,12 +39,13 @@ class Convert(Straw):
         rInputFile = os.path.join(self._config['fileDir'], dlPath, inputFile) #完整路径
         rOutputFile = "{}.mp4".format(os.path.join(self._config['fileDir'], dlPath, outputFile)) #完整路径
         Util.info('开始转码 {}'.format(inputFile))
-        try:
-            os.system("ffmpeg -i {} -acodec aac -ab 128k -vcodec libx264 -f mp4 -s hd480 {}".format(rInputFile, rOutputFile))
+        convertStatus =os.system("ffmpeg -i {} -acodec aac -ab 128k -vcodec libx264 -f mp4 -s hd480 {}".format(rInputFile, rOutputFile))
+        if 0 == convertStatus:
             Util.info('转码成功 {}'.format(rOutputFile))
-        except:
+            # 移除原文件
+            os.remove(rInputFile)
+            return "{}.mp4".format(os.path.join(dlPath, outputFile))
+        else:
             Util.error('转码失败')
+            return False
 
-        # 移除原文件
-        os.remove(rInputFile)
-        return rOutputFile

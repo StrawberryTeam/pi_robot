@@ -22,6 +22,7 @@ class Youget(DownloadProtocol, Straw):
     _downloader = 'Youget'
     _db = {}
     _args = {}
+
     def __init__(self, args):
         '''
         -O FILE, --output-filename FILE
@@ -34,20 +35,19 @@ class Youget(DownloadProtocol, Straw):
 
     def dlFileWithProxy(self, link, rdlPath, rfileName, dlfileName):
         Util.info("Dl with proxy {}".format(os.path.join(rdlPath, rfileName)))
-        try:
-            os.system("{} {} -o {} -O {} -s {}".format(self._args['params']['youget'], link, rdlPath, dlfileName, self._args['proxyInfo']))
-        except:
-            Util.info('影片未成功下载')
+        dlStatus = os.system("{} {} -o {} -O {} -s {}".format(self._args['params']['youget'], link, rdlPath, dlfileName, self._args['proxyInfo']))
+        if 0 == dlStatus:
+            return True
+        else:
+            Util.info('Youget:影片未成功下载')
             return False
 
     def dlFile(self, link, rdlPath, rfileName, dlfileName):
         Util.info("Dl without proxy {}".format(os.path.join(rdlPath, rfileName)))
-        try:
-            # 正常平台下载
-            os.system("{} {} -o {} -O {}".format(self._args['params']['youget'], link, rdlPath, dlfileName))
-        except:
-            Util.info('影片未成功下载')
+        # 正常平台下载
+        dlStatus = os.system("{} {} -o {} -O {}".format(self._args['params']['youget'], link, rdlPath, dlfileName))
+        if 0 == dlStatus:
+            return True
+        else:
+            Util.info('Youget:影片未成功下载')
             return False
-
-        # 下载成功
-        return True

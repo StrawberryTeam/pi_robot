@@ -17,11 +17,8 @@ class Download(Straw):
     _taskName = None
     _isTest = False
 
-    # 下载文件不需要加 .mp4 后缀的 cate
-    _notMp4 = [3, 6, 9] 
-
     # 可用的下载器
-    _dlMatchines = ['youget', 'youtubedl']
+    _dlMatchines = ['youtubedl', 'youget']
 
     def __init__(self, taskName, isTest = False):
         super().__init__()
@@ -34,24 +31,23 @@ class Download(Straw):
         # 未指定下载器
         if not self._taskName:
             self._taskName = self._dlMatchines[0].capitalize()
-
-        taskObj = importlib.import_module('.{}'.format(self._taskName), 'Service.Download')
         # 指定一个下载器
-        self.getNewMatchine(taskObj, self._taskName)
+        self.getNewMatchine(self._taskName)
 
 
 
     configList = {}
     # 获取一个新的下载器
-    def getNewMatchine(self, taskObj, taskName):
+    def getNewMatchine(self, taskName):
+
+        taskObj = importlib.import_module('.{}'.format(self._taskName), 'Service.Download')
         config = self.getConfig()
         self.configList = {
             'uid': config.UID,
             'cateIds': config.CATE_IDS,
             'proxyIds': config.PROXY_IDS,
             'proxyInfo': "{}:{}".format(config.PROXY['proxyHost'], config.PROXY['proxyPort']),
-            'notMp4': self._notMp4,
-            'housewareUid': config.HOUSEWARE_UID,
+            'warehouse': config.WAREHOUSE,
             'params': {
                 'youget': config.TASK['youGet'],
                 'youtubedl': config.TASK['youTubeDl'],
@@ -63,13 +59,14 @@ class Download(Straw):
             raise TypeError('Task must instance of DownloadProtocol')
 
 
+    # 下载文件不需要加 .mp4 后缀的 cate
+    _notMp4 = [3, 6, 9] 
 
     def dlFile(self, args = {}):
         '''
         下载影片
         videoId 指定下载视频 id
         dlMachine 指定下载方法 youget / youtubedl 默认自动，即不可用时切换
-        toHouseware 上传至仓库
         '''
         if 'videoId' in args:
             # 指定视频 
@@ -80,7 +77,7 @@ class Download(Straw):
 
         if not videoInfo:
             Util.info('该设备 {} 没有需要下载的资源'.format(self.configList['uid']))
-            exit()
+            return False
 
         Util.info("Download:{} dlFile".format(self._taskName))
         Util.info("正在下载影片 {}, videoId: {} setId: {}".format(videoInfo['name'], videoInfo['_id'], videoInfo['setId']))
@@ -93,11 +90,6 @@ class Download(Straw):
         # 文件名重新命名
         fileName = Util.genRandName(11) # 10位文件夹的 video 为 17版本, 11位的为 18版本
         rfileName = fileName + '.mp4' # 写入数据库的 名称
-        dlfileName = fileName # 下载时用的名称
-        #@todo 确认下载名称 和 下载类型，尽量下载更高清晰度的
-        if int(videoInfo['platform']) not in self.configList['notMp4']: # 乐视不需要 .mp4
-            Util.info('File Add .mp4')
-            dlfileName = rfileName
 
         # 是否使用代理
         doDl = 'dlFile'
@@ -105,30 +97,39 @@ class Download(Straw):
             doDl = 'dlFileWithProxy'
 
         # 下载过程
-        dlStatus = getattr(self._taskObj, doDl)(videoInfo['link'], rdlPath, rfileName, dlfileName)
+        dlStatus = getattr(self._taskObj, doDl)(videoInfo['link'], rdlPath, rfileName, fileName)
             
         # 下载完成后首先确认文件是否存在
         if not os.path.exists(os.path.join(rdlPath, rfileName)):
             Util.error('确认影片失败，需要重新下载该影片')
-            exit()
+            return False
 
+        switchMatchine = True
         # 下载成功
         if True == dlStatus:
             # 开始转码 转为 web 可用格式
-            webVideo = self.getService('Background/Convert').toMp4({'dlPath': dlPath, 'inputFile': rfileName})
+            webVideo = self.getService('Background.Convert').toMp4({'dlPath': dlPath, 'inputFile': rfileName})
             # 下载完成写入新记录
             self.getModel('VideoList').newPlay(videoInfo['_id'], self.configList['uid'], webVideo)
             # 影片集 总下载数  + 1
             self.getModel("VideoSet").setCanPlayNum(videoInfo['setId'], self.configList['uid'])
 
-            # 下载至 houseware
-            if self.configList['uid'] == self.configList['housewareUid']:
+            # 下载至 warehouse
+            if self.configList['uid'] == self.configList['warehouse']['uid']:
                 pass
 
+            Util.info("Download:{} dlFile end".format(self._taskName))
+            self.getFreeDisk()
+        else:
+            # 每次执行允许切换一次
+            if False == switchMatchine:
+                return False
+            switchMatchine = False
+            # 换下载方法进行下载
+            tmpMatchine = self._dlMatchines
+            tmpMatchine.remove(self._taskName.lower())
+            return self.getNewMatchine(tmpMatchine[0].capitalize())
             
-
-        Util.info("Download:{} dlFile end".format(self._taskName))
-
 
     # 获取剩余空间 当前磁盘
     # return int GB 
@@ -136,7 +137,11 @@ class Download(Straw):
         if platform.system() == 'Windows':
             free_bytes = ctypes.c_ulonglong(0)
             ctypes.windll.kernel32.GetDiskFreeSpaceExW(ctypes.c_wchar_p(folder), None, None, ctypes.pointer(free_bytes))
-            return math.floor(free_bytes.value / 1024 / 1024 / 1024)
+            freeGb = math.floor(free_bytes.value / 1024 / 1024 / 1024)
         else:
             st = os.statvfs(folder)
-            return math.floor(st.f_bavail * st.f_frsize / 1024 / 1024)
+            freeGb = math.floor(st.f_bavail * st.f_frsize / 1024 / 1024)
+
+        # 写入剩余空间
+        self.getModel('Setting').setFreeSpace(self.configList['uid'], freeGb)
+        return freeGb

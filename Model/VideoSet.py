@@ -76,7 +76,7 @@ class VideoSet(Db):
             return False
         if not isinstance(_id, ObjectId):
             _id = ObjectId(_id)
-        modify = self._db.update_one({"_id": _id}, {"$set": {"episode": Util.conv2(data['episode'], self._videoSetFields['episode'])}})
+        modify = self._db.update_one({"_id": _id}, {"$set": {"episode": Util.conv2(data['episode'], self.videoSetFields['episode'])}})
         return True if modify else False
 
     #删除影片集

@@ -8,7 +8,10 @@
 UID = '2'
 
 # 远程环境
-HOUSEWARE_UID = 2
+HOUSEWARE = {
+    'uid': '2',
+    'token': ''
+}
 
 # 可用的分类
 CATE_IDS = [
