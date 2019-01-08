@@ -10,7 +10,9 @@ UID = '2'
 # 远程环境
 WAREHOUSE = {
     'uid': '2',
-    'token': ''
+    'token': '',
+    'repoName': 'Pi-warehouse',
+    'host': 'warehouse.zlizhe.com',
 }
 
 # 可用的分类

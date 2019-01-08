@@ -53,8 +53,13 @@ class Util(Straw):
 
     # post 方式获取
     @staticmethod
-    def postPage(link, data = {}):
-        return requests.post(link, data=data)
+    def postPage(link, data = {}, headers = {}):
+        return requests.post(link, data = data, headers = headers)
+
+    # put
+    @staticmethod
+    def putPage(link, data = {}, headers = {}):
+        return requests.put(link, data = data, headers = headers)
 
     # 检查必须字段
     @staticmethod
