@@ -16,6 +16,13 @@ pip3 install supervisor easy_install supervisor #进程管理 http://supervisord
 
 #pip3 install ffmpeg-python
 
+# warehouse config
+Host Pi-Warehouse
+Hostname github.com
+Port 22
+User git
+Identityfile ~/.ssh/Pi-Warehouse
+
 # ffmpeg 视频转 mp4 （h.264） 以供web播放
 # ubuntu ffmpeg install
 sudo add-apt-repository ppa:mc3man/trusty-media
