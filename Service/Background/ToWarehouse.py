@@ -30,7 +30,27 @@ class ToWarehouse(Straw):
             Util.error('{} 文件超过单个文件大小限制 size: {}MB'.format(args['file'], sizeMb))
             return False
 
-        self.createRepo()
+        settingInfo = self.getModel('Setting').getSetting(self._config.UID)
+        if 'lastRepoId' not in settingInfo:
+            lastRepoId = "1"
+        else:
+            lastRepoId = str(settingInfo['lastRepoId'] + 1)
+
+        originUrl = self.commitFiles(args['file'], lastRepoId)
+        print(originUrl)
+        # if True == self.createRepo(lastRepoId):
+        #     self.commitFiles(args['file'])
+
+    # 提交文件至仓库
+    def commitFiles(self, file, repoName):
+        os.chdir(os.path.join(self._config.TASK['repoDir'], repoName))
+        os.system('git pull origin gh-pages')
+        shutil.copyfile(os.path.join(self._config.TASK['fileDir'], file), os.path.join(self._config.TASK['repoDir'], repoName, os.path.basename(file)))
+        os.system('git add *.mp4 && git add *.jpg && git add *.png && git add *.jpe')
+        os.system('git commit -m {}'.format(os.path.basename(file)))
+        os.system('git push origin gh-pages')
+        print("文件添加至仓库")
+        return "https://{}/{}/{}".format(self._config.WAREHOUSE['host'], repoName, os.path.basename(file))
 
     # 创建仓库
     _apiCreateRepo = {
@@ -48,15 +68,7 @@ class ToWarehouse(Straw):
 
 
     # 创建本地仓库
-    def createRepo(self):
-        self.createPage('1')
-        exit()
-
-        settingInfo = self.getModel('Setting').getSetting(self._config.UID)
-        if 'lastRepoId' not in settingInfo:
-            lastRepoId = "1"
-        else:
-            lastRepoId = str(settingInfo['lastRepoId'] + 1)
+    def createRepo(self, lastRepoId):
 
         # repo name
         self._apiCreateRepo['params']['name'] = '{}'.format(lastRepoId)
@@ -64,14 +76,17 @@ class ToWarehouse(Straw):
             self._apiCreateRepo['url'].format(self._config.WAREHOUSE['token']), 
             json.dumps(self._apiCreateRepo['params'])
         )
-        print(info.status_code)
         # 已经存在
         if 422 == info.status_code:
             Util.info('仓库已存在')
+            return True
         elif 201 == info.status_code:
+            self.createPage(lastRepoId)
             self.setRepoCname(lastRepoId)
+            return True
         else:
             Util.error('本地仓库创建失败')
+            return True
 
     # 创建 gh-pages
     def createPage(self, repoName):
@@ -91,6 +106,7 @@ class ToWarehouse(Straw):
         # sshKey.close()
         os.system("git push origin gh-pages")
         print("Create gh-pages Ok")
+        return True
 
     # 更新别名
     _apiUpdateCname = {
@@ -103,16 +119,16 @@ class ToWarehouse(Straw):
 
     # 设置仓库别名
     def setRepoCname(self, repoName):
-        self._apiUpdateCname['params']['cname'] = "{}".format(self._config.WAREHOUSE['host'])
+        # self._apiUpdateCname['params']['cname'] = "{}".format(self._config.WAREHOUSE['host'])
         cnameRes = Util.putPage(
             self._apiUpdateCname['url'].format(self._config.WAREHOUSE['repoName'], repoName, self._config.WAREHOUSE['token']),
             json.dumps(self._apiUpdateCname['params']),
             headers={'Accept': 'application/vnd.github.mister-fantastic-preview+json'}
         )
 
-        print(self._apiUpdateCname['url'].format(self._config.WAREHOUSE['repoName'], repoName, self._config.WAREHOUSE['token']))
-        print(self._apiUpdateCname['params'])
-        if 200 == cnameRes.status_code:
+        if 400 == cnameRes.status_code:
             Util.info('仓库创建成功')
+            return True
         else:
             Util.info('仓库创建失败 {}'.format(cnameRes))
+            return False
