@@ -38,8 +38,8 @@ class ToWarehouse(Straw):
 
         originUrl = self.commitFiles(args['file'], lastRepoId)
         print(originUrl)
-        # if True == self.createRepo(lastRepoId):
-        #     self.commitFiles(args['file'])
+        if True == self.createRepo(lastRepoId):
+            self.commitFiles(args['file'], lastRepoId)
 
     # 提交文件至仓库
     def commitFiles(self, file, repoName):
