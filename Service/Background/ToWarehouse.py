@@ -22,6 +22,10 @@ class ToWarehouse(Straw):
         if 'file' not in args:
             Util.error('File can not found')
             return False
+
+        if 'id' not in args:
+            Util.error("Video id can not found")
+            return False
         
         size = os.path.getsize(os.path.join(self._config.TASK['fileDir'], args['file']))
         # warehouse 单个文件不能超过 95MB
@@ -30,23 +34,30 @@ class ToWarehouse(Straw):
             Util.error('{} 文件超过单个文件大小限制 size: {}MB'.format(args['file'], sizeMb))
             return False
 
-        settingInfo = self.getModel('Setting').getSetting(self._config.UID)
+        settingInfo = self.getModel('Setting').getSetting(self._config.WAREHOUSE['uid'])
         if 'lastRepoId' not in settingInfo:
             lastRepoId = "1"
         else:
             lastRepoId = str(settingInfo['lastRepoId'] + 1)
 
+        # 本地文件夹不存在时
+        if not os.path.exists(os.path.join(self._config.TASK['repoDir'], lastRepoId)):
+            if False == self.createRepo(lastRepoId):
+                # 创建仓库失败
+                return False
+
+        # 开始提交文件
         originUrl = self.commitFiles(args['file'], lastRepoId)
-        print(originUrl)
-        if True == self.createRepo(lastRepoId):
-            self.commitFiles(args['file'], lastRepoId)
+        # 更新远程地址至 远程 UID
+        self.getModel('VideoList').newPlay(args['id'], self._config.WAREHOUSE['uid'], originUrl)
+        return True
 
     # 提交文件至仓库
     def commitFiles(self, file, repoName):
         os.chdir(os.path.join(self._config.TASK['repoDir'], repoName))
         os.system('git pull origin gh-pages')
         shutil.copyfile(os.path.join(self._config.TASK['fileDir'], file), os.path.join(self._config.TASK['repoDir'], repoName, os.path.basename(file)))
-        os.system('git add *.mp4 && git add *.jpg && git add *.png && git add *.jpe')
+        os.system('git add *.mp4 && git add *.jpg && git add *.png && git add *.jpeg')
         os.system('git commit -m {}'.format(os.path.basename(file)))
         os.system('git push origin gh-pages')
         print("文件添加至仓库")
@@ -86,7 +97,7 @@ class ToWarehouse(Straw):
             return True
         else:
             Util.error('本地仓库创建失败')
-            return True
+            return False
 
     # 创建 gh-pages
     def createPage(self, repoName):

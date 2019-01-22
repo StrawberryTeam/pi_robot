@@ -27,7 +27,7 @@ class Run(Straw):
         self._taskType = 'Background'
         self._taskName = 'ToWarehouse'
         self._process = 'process'
-        self._args = {'file': '0107/XKhqKXGLSEs.mp4'}
+        self._args = {'file': '0107/XKhqKXGLSEs.mp4', 'id': '5c19fddde203c64bdc192997'}
         # 测试用 end
 
         # 根据传入参数拉起一个任务
