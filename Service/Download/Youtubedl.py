@@ -47,10 +47,10 @@ class Youtubedl(DownloadProtocol, Straw):
     def dlFileWithProxy(self, link, rdlPath, dlfileName):
         Util.info("Dl with proxy")
 
-        filename = subprocess.check_output([self._args['params']['youtubeDl'], link, '--get-filename', '-o', '{}.%(ext)s'.format(dlfileName), '--proxy', 'socks5://{}/'.format(self._args['proxyInfo'])])
         # 正常平台下载
         try:
-            subprocess.check_call([self._args['params']['youtubeDl'], link, '-o', '{}/{}.%(ext)s'.format(rdlPath, dlfileName), '-f', 'bestvideo+bestaudio/best', '--proxy', 'socks5://{}/'.format(self._args['proxyInfo'])])
+            filename = subprocess.check_output([self._args['params']['youtubeDl'], link, '--get-filename', '-o', '{}'.format(dlfileName), '--proxy', 'socks5://{}/'.format(self._args['proxyInfo'])])
+            subprocess.check_call([self._args['params']['youtubeDl'], link, '-o', '{}/{}'.format(rdlPath, dlfileName), '-f', 'bestvideo+bestaudio/best', '--proxy', 'socks5://{}/'.format(self._args['proxyInfo'])])
         except subprocess.CalledProcessError as err:
             Util.error(err) # 记录 Error 至 db
             Util.info('Youtubedl:影片未成功下载')
@@ -62,10 +62,10 @@ class Youtubedl(DownloadProtocol, Straw):
     def dlFile(self, link, rdlPath, dlfileName):
         Util.info("Dl without proxy")
 
-        filename = subprocess.check_output([self._args['params']['youtubeDl'], link, '--get-filename', '-o', '{}.%(ext)s'.format(dlfileName)])
         # 正常平台下载
         try:
-            subprocess.check_call([self._args['params']['youtubeDl'], link, '-o', '{}/{}.%(ext)s'.format(rdlPath, dlfileName), '-f', 'bestvideo+bestaudio/best'])
+            filename = subprocess.check_output([self._args['params']['youtubeDl'], link, '--get-filename', '-o', '{}'.format(dlfileName)])
+            subprocess.check_call([self._args['params']['youtubeDl'], link, '-o', '{}/{}'.format(rdlPath, dlfileName), '-f', 'bestvideo+bestaudio/best'])
         except subprocess.CalledProcessError as err:
             Util.error(err) # 记录 Error 至 db
             Util.info('Youtubedl:影片未成功下载')

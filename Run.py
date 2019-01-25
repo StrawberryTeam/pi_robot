@@ -20,14 +20,14 @@ class Run(Straw):
         self.parseArgs()
 
         # 测试用
-        # self._taskType = 'Download'
-        # self._taskName = ''
-        # self._process = 'dlFile'
-        # self._args = {'videoId': '5c19fddde203c64bdc192997'}
-        self._taskType = 'Background'
-        self._taskName = 'ToWarehouse'
-        self._process = 'process'
-        self._args = {'file': '0107/XKhqKXGLSEs.mp4', 'id': '5c19fddde203c64bdc192997'}
+        self._taskType = 'Download'
+        self._taskName = ''
+        self._process = 'dlFile'
+        self._args = {'videoId': '5c19fddde203c64bdc19299b'}
+        # self._taskType = 'Background'
+        # self._taskName = 'ToWarehouse'
+        # self._process = 'process'
+        # self._args = {'file': '0123/GxEfOYUhozv.mp4', 'id': '5c19fddde203c64bdc19299a'}
         # 测试用 end
 
         # 根据传入参数拉起一个任务

@@ -76,5 +76,7 @@ class VideoList(Db):
     # 新的可播放 单集 
     # data 本设备 播放地址
     def newPlay(self, _id, uid, data):
+        if not isinstance(_id, ObjectId):
+            _id = ObjectId(_id)
         # 更新已下载（可播放）数量
         return self._db.update_one({"_id": _id}, {"$set": {"plays." + str(uid): data}})

@@ -40,7 +40,7 @@ class Download(Straw):
     # 获取一个新的下载器
     def getNewMatchine(self, taskName):
 
-        taskObj = importlib.import_module('.{}'.format(self._taskName), 'Service.Download')
+        taskObj = importlib.import_module('.{}'.format(taskName), 'Service.Download')
         config = self.getConfig()
         self.configList = {
             'uid': config.UID,
@@ -61,6 +61,7 @@ class Download(Straw):
 
     # 下载文件不需要加 .mp4 后缀的 cate
     _notMp4 = [3, 6, 9] 
+    _videoExt = ['', 'mp4', 'webm', 'flv', 'mkv', 'wmv', 'mov', 'avi']
 
     def dlFile(self, args = {}):
         '''
@@ -100,13 +101,16 @@ class Download(Straw):
         dlFileName = getattr(self._taskObj, doDl)(videoInfo['link'], rdlPath, fileName)
             
         # 下载完成后首先确认文件是否存在
-        if not os.path.exists(os.path.join(rdlPath, dlFileName)):
-            Util.error('确认影片失败，需要重新下载该影片')
-            return False
+        videoExists = False
+        for ext in self._videoExt:
+            if os.path.exists(os.path.join(rdlPath, "{}.{}".format(dlFileName, ext))):
+                dlFileName = "{}.{}".format(dlFileName, ext)
+                videoExists = True
+                break
 
         switchMatchine = True
         # 下载成功
-        if False == dlFileName:
+        if False == videoExists:
             # 每次执行允许切换一次
             if False == switchMatchine:
                 return False

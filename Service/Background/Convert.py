@@ -11,7 +11,6 @@ class Convert(Straw):
     '''
     视频转码为 WEB 可播放格式
     ffmpeg -i 'INPUT' -acodec aac -ab 128k -vcodec libx264 -f mp4 -s hd480 out.mp4
-    -fs 10485760 按大小切分
     '''
 
     _config = {}

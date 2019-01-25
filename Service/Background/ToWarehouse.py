@@ -10,6 +10,8 @@ import shutil
 class ToWarehouse(Straw):
     '''
     创建仓库，并上传本地文件至远程仓库
+    文件大于单个文件数量时 分割文件
+    ffmpeg -i .\GxEfOYUhozv.mp4 -map 0 -c copy -f segment -segment_time 100 output_%03d.mp4
     '''
 
     _config = {}
@@ -48,6 +50,7 @@ class ToWarehouse(Straw):
 
         # 开始提交文件
         originUrl = self.commitFiles(args['file'], lastRepoId)
+        Util.info('更新远程地址 {}'.format(originUrl))
         # 更新远程地址至 远程 UID
         self.getModel('VideoList').newPlay(args['id'], self._config.WAREHOUSE['uid'], originUrl)
         return True
@@ -60,7 +63,7 @@ class ToWarehouse(Straw):
         os.system('git add *.mp4 && git add *.jpg && git add *.png && git add *.jpeg')
         os.system('git commit -m {}'.format(os.path.basename(file)))
         os.system('git push origin gh-pages')
-        print("文件添加至仓库")
+        Util.info("文件添加至仓库成功")
         return "https://{}/{}/{}".format(self._config.WAREHOUSE['host'], repoName, os.path.basename(file))
 
     # 创建仓库
