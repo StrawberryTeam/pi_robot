@@ -11,7 +11,7 @@ class ToWarehouse(Straw):
     '''
     创建仓库，并上传本地文件至远程仓库
     文件大于单个文件数量时 分割文件
-    ffmpeg -i .\GxEfOYUhozv.mp4 -map 0 -c copy -f segment -segment_time 100 output_%03d.mp4
+    ffmpeg -i .\GxEfOYUhozv.mp4 -map 0 -c copy -f segment -segment_time 500 output_%03d.mp4
     '''
 
     _config = {}
