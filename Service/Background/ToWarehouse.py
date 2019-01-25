@@ -30,9 +30,9 @@ class ToWarehouse(Straw):
             return False
         
         size = os.path.getsize(os.path.join(self._config.TASK['fileDir'], args['file']))
-        # warehouse 单个文件不能超过 95MB
+        # warehouse 单个文件不能超过 45MB
         sizeMb = size / 1024 / 1024
-        if sizeMb > 95:
+        if sizeMb > 45:
             Util.error('{} 文件超过单个文件大小限制 size: {}MB'.format(args['file'], sizeMb))
             return False
 
